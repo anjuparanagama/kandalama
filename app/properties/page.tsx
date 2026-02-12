@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import PropertyCard from '@/components/PropertyCard';
 import FilterSidebar from '@/components/FilterSidebar';
 import { supabase, Property } from '@/lib/supabase';
-import dummyProperties from '@/lib/dummyData';
 import { Button } from '@/components/ui/button';
 import { SlidersHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -47,8 +46,6 @@ export default function PropertiesPage() {
 
       if (data && data.length > 0) {
         setProperties(data as any);
-      } else if (process.env.NODE_ENV === 'development') {
-        setProperties(dummyProperties as any);
       }
     } catch (error) {
       console.error('Error fetching properties:', error);

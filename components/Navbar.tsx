@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, Menu, X, Plus, LogIn, Globe, ChevronDown } from 'lucide-react';
+import { Search, Menu, X, Plus, LogIn, Globe, ChevronDown, LogOut, User, Package } from 'lucide-react';
 import localFont from 'next/font/local';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { supabase } from '@/lib/supabase';
 
 const unBaron = localFont({ src: '../un-baron-prod.ttf', display: 'swap' });
 
@@ -15,7 +16,11 @@ export default function Navbar() {
   const { t, i18n } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLangs, setShowLangs] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const langBtnRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!showLangs) return;
@@ -31,6 +36,45 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [showLangs]);
 
+  useEffect(() => {
+    if (!showUserMenu) return;
+    const handleClick = (e: MouseEvent) => {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(e.target as Node)
+      ) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showUserMenu]);
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user || null);
+        setLoading(false);
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, []);
+
 
   const languages = [
     { code: 'en', label: 'English' },
@@ -41,6 +85,15 @@ export default function Navbar() {
   const handleLanguageChange = (lng: string) => {
     i18n.changeLanguage(lng);
     setShowLangs(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   return (
@@ -73,13 +126,15 @@ export default function Navbar() {
             </div>
           </div>
 
-          <div className="hidden md:flex items-center space-x-4">
-            <Link href="/login">
-              <Button className="bg-[#ffb703] hover:bg-[#e6a103] text-black flex items-center">
-                <LogIn className="h-4 w-4 mr-2" />
-                {t('navbar.login')}
-              </Button>
-            </Link>
+          <div className="hidden md:flex items-center space-x-4 flex-1 justify-end">
+            {!user && (
+              <Link href="/login">
+                <Button className="bg-[#ffb703] hover:bg-[#e6a103] text-black flex items-center">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  {t('navbar.login')}
+                </Button>
+              </Link>
+            )}
             <Link href="/post-ad">
               <Button className="bg-[#ffb703] hover:bg-[#e4ac29] text-black">
                 <Plus className="h-4 w-4 mr-2 text-black" />
@@ -113,6 +168,54 @@ export default function Navbar() {
                 </div>
               )}
             </div>
+            {user && (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  className="flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-full p-2.5 shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+                  onClick={() => setShowUserMenu((prev) => !prev)}
+                  aria-label="User menu"
+                  type="button"
+                >
+                  <User className="w-5 h-5" />
+                </button>
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-2xl z-50 overflow-hidden border border-gray-100 animate-in fade-in slide-in-from-top-2 duration-200">
+                    {/* Header with user email */}
+                    <div className="px-5 py-4 bg-gradient-to-r from-blue-50 to-blue-100 border-b border-gray-200">
+                      <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Account</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate">{user.email}</p>
+                    </div>
+                    
+                    {/* Menu items */}
+                    <div className="py-2">
+                      <Link href="/my-ads" className="block">
+                        <button
+                          onClick={() => setShowUserMenu(false)}
+                          className="w-full text-left px-5 py-3 hover:bg-blue-50 text-gray-800 flex items-center gap-3 transition-colors duration-150 group"
+                        >
+                          <Package className="h-4 w-4 text-blue-600 group-hover:text-blue-700" />
+                          <span className="font-medium">My Ads</span>
+                        </button>
+                      </Link>
+                    </div>
+
+                    {/* Logout button */}
+                    <div className="border-t border-gray-100 py-2">
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setShowUserMenu(false);
+                        }}
+                        className="w-full text-left px-5 py-3 hover:bg-red-50 text-red-600 flex items-center gap-3 transition-colors duration-150 group"
+                      >
+                        <LogOut className="h-4 w-4 group-hover:text-red-700" />
+                        <span className="font-medium">Logout</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <button
@@ -148,26 +251,54 @@ export default function Navbar() {
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-white bg-blue-600">
+        <div className="md:hidden border-t border-white bg-gradient-to-b from-blue-600 to-blue-700">
           <div className="px-4 py-4 space-y-3">
-            <Link href="/login" className="block">
-              <Button className="w-full bg-[#ffb703] hover:bg-[#e6a103] text-black flex items-center justify-center">
-                <LogIn className="h-4 w-4 mr-2" />
-                {t('navbar.login')}
-              </Button>
-            </Link>
+            {!user && (
+              <Link href="/login" className="block">
+                <Button className="w-full bg-[#ffb703] hover:bg-[#e6a103] text-black flex items-center justify-center font-semibold rounded-lg">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  {t('navbar.login')}
+                </Button>
+              </Link>
+            )}
+            {user && (
+              <>
+                <div className="w-full bg-white/15 backdrop-blur-sm text-white px-4 py-4 rounded-lg flex items-center gap-3 border border-white/20">
+                  <div className="flex items-center justify-center bg-blue-500 rounded-full p-2">
+                    <User className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-white/70 uppercase tracking-wider">Account</p>
+                    <p className="text-sm font-semibold text-white truncate">{user.email}</p>
+                  </div>
+                </div>
+                <Link href="/my-ads" className="block">
+                  <Button className="w-full bg-white text-blue-600 hover:bg-blue-50 font-semibold rounded-lg">
+                    <Package className="h-4 w-4 mr-2" />
+                    My Ads
+                  </Button>
+                </Link>
+              </>
+            )}
             <Link href="/post-ad" className="block">
-              <Button className="w-full bg-[#ffb703] hover:bg-[#e4ac29] text-black">
+              <Button className="w-full bg-[#ffb703] hover:bg-[#e6a103] text-black font-semibold rounded-lg">
                 <Plus className="h-4 w-4 mr-2 text-black" />
                 {t('navbar.postAd')}
               </Button>
             </Link>
-            <div className="mt-2">
+            {user && (
+              <Button onClick={handleLogout} className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg">
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            )}
+            <div className="mt-4 pt-3 border-t border-white/20">
+              <p className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-2 px-1">Language</p>
               <div className="flex gap-2">
                 {languages.map((lang) => (
                   <Button
                     key={lang.code}
-                    className={`flex-1 ${i18n.language === lang.code ? 'bg-yellow-400 text-black' : 'bg-white text-black border border-gray-300'} px-2 py-1`}
+                    className={`flex-1 rounded-lg font-medium transition-all ${i18n.language === lang.code ? 'bg-[#ffb703] text-black shadow-md' : 'bg-white/20 text-white border border-white/30 hover:bg-white/30'}`}
                     onClick={() => handleLanguageChange(lang.code)}
                   >
                     {lang.label}
