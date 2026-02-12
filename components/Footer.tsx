@@ -1,11 +1,15 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
 import { Home, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import localFont from "next/font/local";
+import { useTranslation } from "react-i18next";
 
 const unBaron = localFont({ src: "../un-baron-prod.ttf", display: "swap" });
 
 export default function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -37,6 +41,7 @@ export default function Footer() {
 
           <div>
             <h3 className="text-white font-semibold mb-4">Quick Links</h3>
+            <hr className="border-gray-500 w-24 -mt-4 mb-2" />
             <ul className="space-y-2">
               <li>
                 <Link href="/" className="hover:text-white transition">
@@ -61,6 +66,7 @@ export default function Footer() {
 
           <div>
             <h3 className="text-white font-semibold mb-4">About</h3>
+            <hr className="border-gray-500 w-12 -mt-4 mb-2" />
             <ul className="space-y-2">
               <li>
                 <Link href="/about" className="hover:text-white transition">
@@ -82,6 +88,7 @@ export default function Footer() {
 
           <div>
             <h3 className="text-white font-semibold mb-4">Follow Us</h3>
+            <hr className="border-gray-500 w-20 -mt-4 mb-3" />
             <div className="flex space-x-4">
               <a
                 href="#"

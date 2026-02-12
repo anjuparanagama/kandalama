@@ -1,6 +1,9 @@
+'use client';
+
 import Link from 'next/link';
 import { LucideIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { useTranslation } from 'react-i18next';
 
 interface CategoryCardProps {
   title: string;
@@ -15,6 +18,7 @@ export default function CategoryCard({
   count,
   href,
 }: CategoryCardProps) {
+  const { t } = useTranslation();
   const formatNumber = (n?: number) =>
     typeof n === 'number' ? new Intl.NumberFormat().format(n) : '';
   return (
@@ -25,7 +29,7 @@ export default function CategoryCard({
             <Icon className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600 group-hover:text-white transition" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-base text-center sm:text-left truncate">{title}</h3>
+            <h3>{t('properties.title')}</h3>
             {count !== undefined && (
               <p className="text-[10px] text-gray-400 text-center sm:text-left">{formatNumber(count)} ads</p>
             )}

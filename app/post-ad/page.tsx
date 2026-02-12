@@ -15,11 +15,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
+import { getDistrictsByLanguage } from '../../constant/district';
 import { Upload, ChevronRight, ChevronLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function PostAdPage() {
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const districts = getDistrictsByLanguage(i18n.language);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -100,11 +104,11 @@ export default function PostAdPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 md:py-12">
+    <div className="min-h-screen bg-gray-50 py-6 md:py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="md:text-4xl text-2xl font-bold sm:mb-2 text-center sm:text-start">Post Your Property</h1>
-          <p className="text-gray-600 text-xs sm:text-base text-center sm:text-start">
+        <div className="mb-5">
+          <h1 className="text-lg md:text-2xl font-bold text-blue-900 text-center sm:text-start ">{t('postAd.title')}</h1>
+          <p className="text-gray-500 text-xs sm:text-base text-center sm:text-start">
             Fill in the details to list your property
           </p>
         </div>
@@ -317,31 +321,9 @@ export default function PostAdPage() {
                           <SelectValue placeholder="Select district" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Ampara">Ampara</SelectItem>
-                          <SelectItem value="Anuradhapura">Anuradhapura</SelectItem>
-                          <SelectItem value="Badulla">Badulla</SelectItem>
-                          <SelectItem value="Batticaloa">Batticaloa</SelectItem>
-                          <SelectItem value="Colombo">Colombo</SelectItem>
-                          <SelectItem value="Galle">Galle</SelectItem>
-                          <SelectItem value="Gampaha">Gampaha</SelectItem>
-                          <SelectItem value="Hambantota">Hambantota</SelectItem>
-                          <SelectItem value="Jaffna">Jaffna</SelectItem>
-                          <SelectItem value="Kalutara">Kalutara</SelectItem>
-                          <SelectItem value="Kandy">Kandy</SelectItem>
-                          <SelectItem value="Kegalle">Kegalle</SelectItem>
-                          <SelectItem value="Kilinochchi">Kilinochchi</SelectItem>
-                          <SelectItem value="Kurunegala">Kurunegala</SelectItem>
-                          <SelectItem value="Mannar">Mannar</SelectItem>
-                          <SelectItem value="Matale">Matale</SelectItem>
-                          <SelectItem value="Matara">Matara</SelectItem>
-                          <SelectItem value="Monaragala">Monaragala</SelectItem>
-                          <SelectItem value="Mullaitivu">Mullaitivu</SelectItem>
-                          <SelectItem value="Nuwara Eliya">Nuwara Eliya</SelectItem>
-                          <SelectItem value="Polonnaruwa">Polonnaruwa</SelectItem>
-                          <SelectItem value="Puttalam">Puttalam</SelectItem>
-                          <SelectItem value="Ratnapura">Ratnapura</SelectItem>
-                          <SelectItem value="Trincomalee">Trincomalee</SelectItem>
-                          <SelectItem value="Vavuniya">Vavuniya</SelectItem>
+                          {districts.map((district) => (
+                            <SelectItem key={district} value={district}>{district}</SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>

@@ -22,8 +22,10 @@ import {
   X,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 
 export default function PropertyDetailsPage() {
+  const { t } = useTranslation();
   const params = useParams();
   const [property, setProperty] = useState<Property | null>(null);
   const [images, setImages] = useState<PropertyImage[]>([]);

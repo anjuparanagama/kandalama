@@ -10,10 +10,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/lib/supabase';
 import localFont from 'next/font/local';
+import { useTranslation } from 'react-i18next';
 
 const unBaron = localFont({ src: '../../un-baron-prod.ttf', display: 'swap' });
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') || '/';
@@ -67,7 +69,7 @@ export default function LoginPage() {
           <div className="w-full md:w-1/2 p-4 sm:p-6">
             <Card className="w-full">
               <CardHeader className="items-center text-center p-4 sm:p-6">
-                <CardTitle>Login</CardTitle>
+                <CardTitle>{t('login.title')}</CardTitle>
               </CardHeader>
               <CardContent className="p-4 sm:p-6">
                 <form onSubmit={handleLogin} className="space-y-4">
