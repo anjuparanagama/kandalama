@@ -16,8 +16,9 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
 import { getDistrictsByLanguage } from '../../constant/district';
-import { Upload, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Upload, ChevronRight, ChevronLeft, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useCloudinaryUpload } from '@/hooks/useCloudinaryUpload';
 
 export default function PostAdPage() {
   const { t, i18n } = useTranslation();
@@ -25,6 +26,12 @@ export default function PostAdPage() {
   const [step, setStep] = useState(1);
   const districts = getDistrictsByLanguage(i18n.language);
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const { uploadMultiple, uploading: uploadingToCloudinary } = useCloudinaryUpload({
+    onProgress: (current, total) => {
+      setUploadProgress(Math.round((current / total) * 100));
+    },
+  });
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -47,6 +54,7 @@ export default function PostAdPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setUploadProgress(0);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -56,7 +64,8 @@ export default function PostAdPage() {
         return;
       }
 
-      const { data: property, error } = await supabase
+      // 1. Create property first
+      const { data: property, error: propertyError } = await supabase
         .from('properties')
         .insert([
           {
@@ -73,21 +82,50 @@ export default function PostAdPage() {
             bathrooms: formData.bathrooms ? parseInt(formData.bathrooms) : 0,
             area_sqft: parseFloat(formData.area_sqft),
             contact_number: formData.contact_number,
+            whatsapp_number: formData.whatsapp_number || null,
+            map_link: formData.map_link || null,
           },
         ])
         .select()
         .single();
 
-      if (error) throw error;
+      if (propertyError) throw propertyError;
 
-      // TODO: upload `images` to storage and create `property_images` rows
-      // Currently only redirects after creating property
+      // 2. Upload images to Cloudinary and save URLs to database
+      if (images.length > 0) {
+        try {
+          const imageUrls = await uploadMultiple(images);
+
+          // 3. Save image URLs to property_images table
+          const propertyImages = imageUrls.map((url, index) => ({
+            property_id: property.id,
+            image_url: url,
+            is_primary: index === 0,
+            display_order: index,
+          }));
+
+          const { error: imagesError } = await supabase
+            .from('property_images')
+            .insert(propertyImages);
+
+          if (imagesError) {
+            console.error('Error saving image references:', imagesError);
+            // Continue anyway - property was created
+          }
+        } catch (uploadError) {
+          console.error('Image upload failed:', uploadError);
+          // Continue - property was created even if images failed
+          alert('Property created successfully, but image upload failed. You can add images later by editing the property.');
+        }
+      }
+
       router.push(`/properties/${property.id}`);
     } catch (error) {
       console.error('Error posting ad:', error);
       alert('Failed to post advertisement. Please try again.');
     } finally {
       setLoading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -395,25 +433,39 @@ export default function PostAdPage() {
                       />
 
                       {previews.length > 0 && (
-                        <div className="mt-4 grid grid-cols-3 gap-2">
-                          {previews.map((src, idx) => (
-                            <div key={idx} className="relative">
-                              <img src={src} className="w-full h-24 object-cover rounded-md" />
-                              <button
-                                type="button"
-                                onClick={(ev) => {
-                                  ev.stopPropagation();
-                                  // revoke object URL
-                                  URL.revokeObjectURL(src);
-                                  setPreviews((p) => p.filter((_, i) => i !== idx));
-                                  setImages((p) => p.filter((_, i) => i !== idx));
-                                }}
-                                className="absolute top-1 right-1 bg-white rounded-full p-1 shadow"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                          ))}
+                        <div className="mt-4">
+                          <p className="text-sm text-gray-600 mb-2">{previews.length} image{previews.length !== 1 ? 's' : ''} selected</p>
+                          <div className="grid grid-cols-3 gap-2">
+                            {previews.map((src, idx) => (
+                              <div key={idx} className="relative">
+                                <img src={src} className="w-full h-24 object-cover rounded-md" />
+                                <button
+                                  type="button"
+                                  onClick={(ev) => {
+                                    ev.stopPropagation();
+                                    URL.revokeObjectURL(src);
+                                    setPreviews((p) => p.filter((_, i) => i !== idx));
+                                    setImages((p) => p.filter((_, i) => i !== idx));
+                                  }}
+                                  className="absolute top-1 right-1 bg-white rounded-full p-1 shadow hover:bg-gray-100"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {uploadingToCloudinary && (
+                        <div className="mt-4">
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-blue-600 h-2 rounded-full transition-all"
+                              style={{ width: `${uploadProgress}%` }}
+                            />
+                          </div>
+                          <p className="text-sm text-gray-600 mt-2">Uploading images... {uploadProgress}%</p>
                         </div>
                       )}
                     </div>
@@ -501,9 +553,9 @@ export default function PostAdPage() {
               <Button
                 type="submit"
                 className="bg-blue-600 hover:bg-blue-700"
-                disabled={loading}
+                disabled={loading || uploadingToCloudinary}
               >
-                {loading ? 'Posting...' : 'Post Advertisement'}
+                {uploadingToCloudinary ? `Uploading images... ${uploadProgress}%` : loading ? 'Posting...' : 'Post Advertisement'}
               </Button>
             )}
           </div>

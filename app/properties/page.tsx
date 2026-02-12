@@ -22,6 +22,18 @@ export default function PropertiesPage() {
 
   async function fetchProperties() {
     try {
+      console.log('Fetching properties with params:', {
+        listing_type: searchParams.get('listing_type'),
+        category: searchParams.get('category'),
+        district: searchParams.get('district'),
+        minPrice: searchParams.get('minPrice'),
+        maxPrice: searchParams.get('maxPrice'),
+        location: searchParams.get('location'),
+        bedrooms: searchParams.get('bedrooms'),
+        bathrooms: searchParams.get('bathrooms'),
+        search: searchParams.get('search'),
+      });
+
       let query = supabase
         .from('properties')
         .select(`
@@ -30,23 +42,84 @@ export default function PropertiesPage() {
         `)
         .eq('is_active', true);
 
+      // Listing type filter
+      const listingType = searchParams.get('listing_type');
+      if (listingType && listingType !== 'all') {
+        console.log('Applying listing_type filter:', listingType);
+        query = query.eq('listing_type', listingType);
+      }
+
+      // Category filter
       const category = searchParams.get('category');
-      if (category) {
+      if (category && category !== 'all') {
+        console.log('Applying category filter:', category);
         query = query.eq('category', category);
       }
 
+      // Price range filter
+      const minPrice = searchParams.get('minPrice');
+      const maxPrice = searchParams.get('maxPrice');
+      if (minPrice) {
+        console.log('Applying minPrice filter:', minPrice);
+        query = query.gte('price', parseInt(minPrice));
+      }
+      if (maxPrice) {
+        console.log('Applying maxPrice filter:', maxPrice);
+        query = query.lte('price', parseInt(maxPrice));
+      }
+
+      // Bedrooms filter
+      const bedrooms = searchParams.get('bedrooms');
+      if (bedrooms && bedrooms !== 'any') {
+        console.log('Applying bedrooms filter:', bedrooms);
+        query = query.gte('bedrooms', parseInt(bedrooms));
+      }
+
+      // Bathrooms filter
+      const bathrooms = searchParams.get('bathrooms');
+      if (bathrooms && bathrooms !== 'any') {
+        console.log('Applying bathrooms filter:', bathrooms);
+        query = query.gte('bathrooms', parseInt(bathrooms));
+      }
+
+      // District filter
+      const district = searchParams.get('district');
+      if (district && district !== 'all') {
+        console.log('Applying district filter:', district);
+        query = query.ilike('district', district);
+      }
+
+      // Featured filter
       const featured = searchParams.get('featured');
       if (featured === 'true') {
+        console.log('Applying featured filter');
         query = query.eq('is_featured', true);
       }
 
-      const { data } = await query
+      // Location filter - combine into single OR condition
+      const location = searchParams.get('location');
+      const search = searchParams.get('search');
+      
+      if (location && location.trim()) {
+        console.log('Applying location filter:', location);
+        query = query.or(`location.ilike.%${location}%,city.ilike.%${location}%,district.ilike.%${location}%`);
+      } else if (search && search.trim()) {
+        // Search filter - combine all searchable fields
+        console.log('Applying search filter:', search);
+        query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%,location.ilike.%${search}%,city.ilike.%${search}%,district.ilike.%${search}%`);
+      }
+
+      const { data, error } = await query
         .order('created_at', { ascending: false })
         .limit(50);
 
-      if (data && data.length > 0) {
-        setProperties(data as any);
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
       }
+
+      console.log('Results returned:', data?.length || 0, 'properties');
+      setProperties(data as any || []);
     } catch (error) {
       console.error('Error fetching properties:', error);
     } finally {

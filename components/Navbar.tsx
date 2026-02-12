@@ -7,16 +7,19 @@ import localFont from 'next/font/local';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/lib/supabase';
 
 const unBaron = localFont({ src: '../un-baron-prod.ttf', display: 'swap' });
 
 export default function Navbar() {
+  const router = useRouter();
   const { t, i18n } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLangs, setShowLangs] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const langBtnRef = useRef<HTMLDivElement>(null);
@@ -96,6 +99,15 @@ export default function Navbar() {
     }
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/properties?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+      setMobileMenuOpen(false);
+    }
+  };
+
   return (
     <nav className="bg-[#003566] border-b border-gray-500 sticky top-0 z-50 shadow-sm">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -107,23 +119,26 @@ export default function Navbar() {
             <span className={`text-2xl font-medium text-white pt-5 ${unBaron.className}`}>කණ්ඩළම<span className="text-[8px]"> Lk</span></span>
           </Link>
 
-          <div className="hidden md:flex flex-1 max-w-xl mx-8">
-            <div className="w-full">
+          <div className="hidden md:flex flex-1 max-w-2xl mx-8">
+            <form onSubmit={handleSearch} className="w-full">
               <div className="relative">
                 <Input
                   type="text"
                   placeholder="What are you looking for?"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-8 pr-14 h-12 rounded-full bg-white border-0 shadow-sm placeholder:text-gray-400 focus:!bg-[#fff7d6] focus-visible:!bg-[#fff7d6] transition-colors"
                 />
 
                 <button
+                  type="submit"
                   aria-label="Search"
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-yellow-400 hover:bg-yellow-500 rounded-full p-2 h-10 w-10 flex items-center justify-center shadow"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-yellow-400 hover:bg-yellow-500 rounded-full p-2 h-10 w-10 flex items-center justify-center shadow transition-colors"
                 >
                   <Search className="h-4 w-4 text-gray-800" />
                 </button>
               </div>
-            </div>
+            </form>
           </div>
 
           <div className="hidden md:flex items-center space-x-4 flex-1 justify-end">
@@ -231,22 +246,25 @@ export default function Navbar() {
         </div>
 
         <div className="md:hidden pb-4">
-          <div className="relative w-full">
+          <form onSubmit={handleSearch} className="relative w-full">
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
               <Search className="h-5 w-5" />
             </div>
             <Input
               type="text"
               placeholder="What are you looking for?"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 pr-12 h-10 rounded-full bg-white border-0 shadow-sm w-full focus:!bg-[#fff7d6] focus-visible:!bg-[#fff7d6] transition-colors"
             />
             <button
+              type="submit"
               aria-label="Search"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-yellow-400 hover:bg-yellow-500 rounded-full p-2 h-9 w-9 flex items-center justify-center shadow"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-yellow-400 hover:bg-yellow-500 rounded-full p-2 h-9 w-9 flex items-center justify-center shadow transition-colors"
             >
               <Search className="h-4 w-4 text-gray-800" />
             </button>
-          </div>
+          </form>
         </div>
       </div>
 
