@@ -41,6 +41,7 @@ export default function Footer() {
 
           <div>
             <h3 className="text-white font-semibold mb-4">Quick Links</h3>
+            <hr className="border-gray-500 w-24 -mt-4 mb-2" />
             <ul className="space-y-2">
               <li>
                 <Link href="/" className="hover:text-white transition">
@@ -65,6 +66,7 @@ export default function Footer() {
 
           <div>
             <h3 className="text-white font-semibold mb-4">About</h3>
+            <hr className="border-gray-500 w-12 -mt-4 mb-2" />
             <ul className="space-y-2">
               <li>
                 <Link href="/about" className="hover:text-white transition">
@@ -86,6 +88,7 @@ export default function Footer() {
 
           <div>
             <h3 className="text-white font-semibold mb-4">Follow Us</h3>
+            <hr className="border-gray-500 w-20 -mt-4 mb-3" />
             <div className="flex space-x-4">
               <a
                 href="#"

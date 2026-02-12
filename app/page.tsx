@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Building2, Maximize, Building, Home as HomeIcon, DoorOpen } from 'lucide-react';
 import CategoryCard from '@/components/CategoryCard';
 import PropertyCard from '@/components/PropertyCard';
+import FallingIcons from '@/components/FallingIcons';
 import { Button } from '@/components/ui/button';
 import { supabase, Property } from '@/lib/supabase';
 
@@ -110,8 +111,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <section className="bg-[#003566] text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="relative bg-[#003566] text-white py-20 overflow-hidden">
+        <FallingIcons />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
             Find Your Dream Property
           </h1>
@@ -126,8 +128,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">Browse by Category</h2>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-16">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-12">Browse by Category</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {categories.map((category) => (
             <CategoryCard
