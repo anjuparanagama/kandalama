@@ -1,11 +1,15 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
 import { Home, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import localFont from "next/font/local";
+import { useTranslation } from "react-i18next";
 
 const unBaron = localFont({ src: "../un-baron-prod.ttf", display: "swap" });
 
 export default function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

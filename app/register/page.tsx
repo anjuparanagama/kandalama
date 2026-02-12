@@ -11,10 +11,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/lib/supabase';
 import { Home } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const unBaron = localFont({ src: '../../un-baron-prod.ttf', display: 'swap' });
 
 export default function RegisterPage() {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const [email, setEmail] = useState('');

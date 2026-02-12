@@ -4,10 +4,12 @@ import { Inter } from 'next/font/google';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
+import I18nProvider from '@/components/I18nProvider';
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'PropertyHub - Buy, Sell, and Rent Properties in Sri Lanka',
+  title: 'Kandalama Lk - Buy, Sell, and Rent Properties in Sri Lanka',
   description: 'Sri Lanka\'s trusted property marketplace for buying, selling, and renting houses, lands, commercial properties, and more.',
   openGraph: {
     images: [
@@ -34,11 +36,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="flex flex-col min-h-screen">
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
+        <I18nProvider>
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
+        </I18nProvider>
       </body>
     </html>
   );

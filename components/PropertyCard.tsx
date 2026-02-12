@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 interface PropertyCardProps {
   property: Property & { property_images?: Array<{ image_url: string }> };
@@ -13,6 +14,7 @@ interface PropertyCardProps {
 }
 
 export default function PropertyCard({ property, horizontal = false }: PropertyCardProps) {
+  const { t } = useTranslation();
   const primaryImage = property.property_images?.[0]?.image_url || 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=800';
 
   const formatPrice = (price: number) => {

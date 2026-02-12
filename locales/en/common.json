@@ -1,0 +1,41 @@
+{
+  "navbar": {
+    "home": "Home",
+    "about": "About",
+    "properties": "Properties",
+    "postAd": "Post Ad",
+    "login": "Login",
+    "register": "Register"
+  },
+  "footer": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  },
+  "about": {
+    "title": "About Us"
+  },
+  "dummyAd": {
+    "title": "Dummy Ad"
+  },
+  "login": {
+    "title": "Login"
+  },
+  "postAd": {
+    "title": "Post an Ad"
+  },
+  "privacy": {
+    "title": "Privacy Policy"
+  },
+  "properties": {
+    "title": "Properties"
+  },
+  "property": {
+    "title": "Property Details"
+  },
+  "register": {
+    "title": "Register"
+  },
+  "terms": {
+    "title": "Terms of Service"
+  }
+}

@@ -8,8 +8,10 @@ import { supabase, Property } from '@/lib/supabase';
 import dummyProperties from '@/lib/dummyData';
 import { Button } from '@/components/ui/button';
 import { SlidersHorizontal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function PropertiesPage() {
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,10 +62,10 @@ export default function PropertiesPage() {
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">Properties</h1>
-              <p className="text-gray-600 mt-1">
-                {properties.length} properties found
+            <div className="flex flex-col sm:flex-row sm:items-end sm:gap-2">
+              <h1 className="text-lg sm:text-base md:text-2xl font-bold text-blue-950">{t('properties.title')}</h1>
+              <p className="text-gray-600 text-xs sm:text-sm sm:ml-2 sm:mb-1">
+                ( <span className="text-blue-800">{properties.length}</span> properties found )
               </p>
             </div>
             <Button
@@ -85,7 +87,7 @@ export default function PropertiesPage() {
               showFilters ? 'block' : 'hidden'
             } lg:block w-full lg:w-80 flex-shrink-0`}
           >
-            <FilterSidebar />
+            <FilterSidebar isOpen={showFilters} onClose={() => setShowFilters(false)} />
           </aside>
 
           <main className="flex-1">
