@@ -1,7 +1,5 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,161 +12,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { supabase } from '@/lib/supabase';
 import { getDistrictsByLanguage } from '../../constant/district';
 import { getCitiesByDistrict } from '@/constant/cities';
 import { Upload, ChevronRight, ChevronLeft, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useCloudinaryUpload } from '@/hooks/useCloudinaryUpload';
 import { toast } from 'sonner';
+import { usePostAd } from '@/hooks/postAd/use-postAd';
 
 export default function PostAdPage() {
   const { t, i18n } = useTranslation();
-  const router = useRouter();
-  const isSubmittingRef = useRef(false);
-  const [step, setStep] = useState(1);
   const districts = getDistrictsByLanguage(i18n.language);
-  const [loading, setLoading] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const { uploadMultiple, uploading: uploadingToCloudinary } = useCloudinaryUpload({
-    onProgress: (current, total) => {
-      setUploadProgress(Math.round((current / total) * 100));
-    },
-  });
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    price: '',
-    category: '',
-    listing_type: '',
-    location: '',
-    city: '',
-    district: '',
-    bedrooms: '',
-    bathrooms: '',
-    area_sqft: '',
-    contact_number: '',
-    map_link: '',
-    whatsapp_number: '',
-  });
-  const [images, setImages] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
-
-  // Check authentication on page load
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          router.push('/login?redirect=/post-ad');
-          return;
-        }
-        setAuthLoading(false);
-      } catch (error) {
-        console.error('Auth check error:', error);
-        router.push('/login?redirect=/post-ad');
-      }
-    };
-    checkAuth();
-  }, [router]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Prevent multiple submissions
-    if (isSubmittingRef.current) {
-      return;
-    }
-    
-    isSubmittingRef.current = true;
-    setLoading(true);
-    setUploadProgress(0);
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        router.push('/login?redirect=/post-ad');
-        return;
-      }
-
-      // 1. Create property first
-      const { data: property, error: propertyError } = await supabase
-        .from('properties')
-        .insert([
-          {
-            user_id: user.id,
-            title: formData.title,
-            description: formData.description,
-            price: parseFloat(formData.price),
-            category: formData.category,
-            listing_type: formData.listing_type,
-            location: formData.location,
-            city: formData.city,
-            district: formData.district,
-            bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : 0,
-            bathrooms: formData.bathrooms ? parseInt(formData.bathrooms) : 0,
-            area_sqft: parseFloat(formData.area_sqft),
-            contact_number: formData.contact_number,
-            whatsapp_number: formData.whatsapp_number || null,
-            map_link: formData.map_link || null,
-          },
-        ])
-        .select()
-        .single();
-
-      if (propertyError) throw propertyError;
-
-      // 2. Upload images to Cloudinary and save URLs to database
-      if (images.length > 0) {
-        try {
-          const imageUrls = await uploadMultiple(images);
-
-          // 3. Save image URLs to property_images table
-          const propertyImages = imageUrls.map((url, index) => ({
-            property_id: property.id,
-            image_url: url,
-            is_primary: index === 0,
-            display_order: index,
-          }));
-
-          const { error: imagesError } = await supabase
-            .from('property_images')
-            .insert(propertyImages);
-
-          if (imagesError) {
-            console.error('Error saving image references:', imagesError);
-            // Continue anyway - property was created
-          }
-        } catch (uploadError) {
-          console.error('Image upload failed:', uploadError);
-          // Continue - property was created even if images failed
-          toast.warning('Property created successfully, but image upload failed. You can add images later by editing the property.', { duration: 5000 });
-        }
-      }
-
-      toast.success('Property posted successfully!', { duration: 3000 });
-      router.push(`/properties/${property.id}`);
-    } catch (error) {
-      console.error('Error posting ad:', error);
-      toast.error('Failed to post advertisement. Please try again.', { duration: 5000 });
-      isSubmittingRef.current = false;
-      setLoading(false);
-    }
-  };
-
-  const nextStep = () => {
-    if (step < 3) setStep(step + 1);
-  };
-
-  const prevStep = () => {
-    if (step > 1) setStep(step - 1);
-  };
-
-  const updateFormData = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  const {
+    formData,
+    step,
+    loading,
+    authLoading,
+    uploadProgress,
+    images,
+    previews,
+    errors,
+    showAlert,
+    uploadingToCloudinary,
+    updateFormData,
+    validateStep,
+    nextStep,
+    prevStep,
+    handleSubmit,
+    setImages,
+    setPreviews,
+    setErrors,
+  } = usePostAd();
 
   return (
     <div className="min-h-screen bg-gray-50 py-6 md:py-8">
@@ -235,6 +108,11 @@ export default function PostAdPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              {showAlert && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-800 font-semibold">Please fill all required fields</p>
+                </div>
+              )}
               {step === 1 && (
                 <>
                   <div className="space-y-2">
@@ -245,7 +123,9 @@ export default function PostAdPage() {
                       value={formData.title}
                       onChange={(e) => updateFormData('title', e.target.value)}
                       required
+                      className={errors.title ? 'border-red-500' : ''}
                     />
+                    {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -255,7 +135,7 @@ export default function PostAdPage() {
                       onValueChange={(value) => updateFormData('category', value)}
                       required
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
                         <SelectValue placeholder="Select property type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -266,6 +146,7 @@ export default function PostAdPage() {
                         <SelectItem value="annex">Annex</SelectItem>
                       </SelectContent>
                     </Select>
+                    {errors.category && <p className="text-red-500 text-sm">{errors.category}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -277,7 +158,7 @@ export default function PostAdPage() {
                       }
                       required
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className={errors.listing_type ? 'border-red-500' : ''}>
                         <SelectValue placeholder="Select listing type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -285,6 +166,7 @@ export default function PostAdPage() {
                         <SelectItem value="rent">For Rent</SelectItem>
                       </SelectContent>
                     </Select>
+                    {errors.listing_type && <p className="text-red-500 text-sm">{errors.listing_type}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -296,7 +178,9 @@ export default function PostAdPage() {
                       value={formData.price}
                       onChange={(e) => updateFormData('price', e.target.value)}
                       required
+                      className={errors.price ? 'border-red-500' : ''}
                     />
+                    {errors.price && <p className="text-red-500 text-sm">{errors.price}</p>}
                   </div>
                 </>
               )}
@@ -314,7 +198,9 @@ export default function PostAdPage() {
                         updateFormData('description', e.target.value)
                       }
                       required
+                      className={errors.description ? 'border-red-500' : ''}
                     />
+                    {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -356,7 +242,9 @@ export default function PostAdPage() {
                         updateFormData('area_sqft', e.target.value)
                       }
                       required
+                      className={errors.area_sqft ? 'border-red-500' : ''}
                     />
+                    {errors.area_sqft && <p className="text-red-500 text-sm">{errors.area_sqft}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -369,7 +257,9 @@ export default function PostAdPage() {
                         updateFormData('location', e.target.value)
                       }
                       required
+                      className={errors.location ? 'border-red-500' : ''}
                     />
+                    {errors.location && <p className="text-red-500 text-sm">{errors.location}</p>}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -383,7 +273,7 @@ export default function PostAdPage() {
                         }}
                         required
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className={errors.district ? 'border-red-500' : ''}>
                           <SelectValue placeholder="Select district" />
                         </SelectTrigger>
                         <SelectContent>
@@ -392,6 +282,7 @@ export default function PostAdPage() {
                           ))}
                         </SelectContent>
                       </Select>
+                      {errors.district && <p className="text-red-500 text-sm">{errors.district}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="city">City *</Label>
@@ -401,7 +292,7 @@ export default function PostAdPage() {
                         disabled={!formData.district}
                         required
                       >
-                        <SelectTrigger className={!formData.district ? 'opacity-50 cursor-not-allowed' : ''}>
+                        <SelectTrigger className={`${!formData.district ? 'opacity-50 cursor-not-allowed' : ''} ${errors.city ? 'border-red-500' : ''}`}>
                           <SelectValue placeholder={!formData.district ? 'Select district first' : 'Select city'} />
                         </SelectTrigger>
                         <SelectContent>
@@ -410,6 +301,7 @@ export default function PostAdPage() {
                           ))}
                         </SelectContent>
                       </Select>
+                      {errors.city && <p className="text-red-500 text-sm">{errors.city}</p>}
                     </div>
                   </div>
                 </>
@@ -427,8 +319,9 @@ export default function PostAdPage() {
                       onChange={(e) =>
                         updateFormData('contact_number', e.target.value)
                       }
-                      required
+                      className={errors.contact_number ? 'border-red-500' : ''}
                     />
+                    {errors.contact_number && <p className="text-red-500 text-sm">{errors.contact_number}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -445,9 +338,11 @@ export default function PostAdPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Property Images (max 6)</Label>
+                    <Label>Property Images (max 6) *</Label>
                     <div
-                      className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-600 transition cursor-pointer"
+                      className={`border-2 border-dashed rounded-lg p-6 text-center hover:border-blue-600 transition cursor-pointer ${
+                        errors.images ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                      }`}
                       onClick={() => {
                         const el = document.getElementById('image-input');
                         el?.click();
@@ -473,6 +368,14 @@ export default function PostAdPage() {
                           const newPreviews = selected.map((file) => URL.createObjectURL(file));
                           setImages((prev) => [...prev, ...selected]);
                           setPreviews((prev) => [...prev, ...newPreviews]);
+                          // Clear images error when user uploads images
+                          if (errors.images) {
+                            setErrors((prev) => {
+                              const newErrors = { ...prev };
+                              delete newErrors.images;
+                              return newErrors;
+                            });
+                          }
                           // reset input
                           (e.target as HTMLInputElement).value = '';
                         }}
@@ -515,6 +418,7 @@ export default function PostAdPage() {
                         </div>
                       )}
                     </div>
+                    {errors.images && <p className="text-red-500 text-sm">{errors.images}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -591,7 +495,11 @@ export default function PostAdPage() {
             </Button>
 
             {step < 3 ? (
-              <Button type="button" onClick={nextStep} className="bg-[#ffb703] hover:bg-[#e6a103] text-black font-bold">
+              <Button 
+                type="button" 
+                onClick={nextStep} 
+                className="bg-[#ffb703] hover:bg-[#e6a103] text-black font-bold"
+              >
                 Next
                 <ChevronRight className="h-4 w-4 ml-1 stroke-3" />
               </Button>

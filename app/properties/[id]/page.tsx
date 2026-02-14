@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { supabase, Property, PropertyImage } from '@/lib/supabase';
+import { useParams } from 'next/navigation';
+import { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,151 +23,54 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
+import { usePropertyDetails } from '@/hooks/propertiesDetails/use-property-Details';
 
 export default function PropertyDetailsPage() {
   const { t } = useTranslation();
   const params = useParams();
-  const router = useRouter();
-  const [property, setProperty] = useState<Property | null>(null);
-  const [images, setImages] = useState<PropertyImage[]>([]);
-  const [showLightbox, setShowLightbox] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [similarProperties, setSimilarProperties] = useState<Property[]>([]);
-  const [seller, setSeller] = useState<{ name?: string; avatar_url?: string } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null);
-  const [isOwner, setIsOwner] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  
+  const {
+    property,
+    images,
+    showLightbox,
+    setShowLightbox,
+    currentImageIndex,
+    setCurrentImageIndex,
+    similarProperties,
+    seller,
+    loading,
+    isOwner,
+    isDeleting,
+    handleDeleteProperty,
+    nextImage,
+    prevImage,
+    formatPrice,
+  } = usePropertyDetails(params.id as string);
 
-  useEffect(() => {
-    if (params.id) {
-      fetchCurrentUser();
-      fetchProperty(params.id as string);
-    }
-  }, [params.id]);
+  const handleShare = useCallback(async () => {
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const shareData = {
+      title: property?.title || 'Check out this property',
+      text: property?.description || 'Check out this amazing property on Kandalama.Lk',
+      url: shareUrl,
+    };
 
-  async function fetchCurrentUser() {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setCurrentUser({ id: user.id });
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.log('Share cancelled or failed');
       }
-    } catch (error) {
-      console.error('Error fetching current user:', error);
-    }
-  }
-
-  async function fetchProperty(id: string) {
-    try {
-      const { data: propertyData } = await supabase
-        .from('properties')
-        .select(`
-          *,
-          property_images(*)
-        `)
-        .eq('id', id)
-        .maybeSingle();
-      if (propertyData) {
-        setProperty(propertyData as any);
-        
-        // Check if current user is the owner
-        if (currentUser && (propertyData as any).user_id === currentUser.id) {
-          setIsOwner(true);
-        } else {
-          setIsOwner(false);
-        }
-        
-        const sortedImages = (propertyData as any).property_images?.sort(
-          (a: PropertyImage, b: PropertyImage) => a.display_order - b.display_order
-        ) || [];
-          // limit to max 6 images (1 main + 5 thumbnails)
-          setImages((sortedImages as PropertyImage[]).slice(0, 6));
-
-        await supabase.rpc('increment', {
-          row_id: id,
-          table_name: 'properties',
-          column_name: 'views_count',
-        });
-
-        // try to fetch seller profile from a 'profiles' table (if exists)
-        try {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('full_name, avatar_url')
-            .eq('id', propertyData.user_id)
-            .maybeSingle();
-          if (profile) {
-            setSeller({ name: (profile as any).full_name, avatar_url: (profile as any).avatar_url });
-          }
-        } catch (_) {
-          // ignore if profiles table doesn't exist
-        }
-
-        const { data: similar } = await supabase
-          .from('properties')
-          .select(`
-            *,
-            property_images(image_url, is_primary, display_order)
-          `)
-          .eq('category', propertyData.category)
-          .eq('is_active', true)
-          .neq('id', id)
-          .limit(4);
-
-        if (similar) setSimilarProperties(similar as any);
+    } else {
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        alert('Link copied to clipboard!');
+      } catch (err) {
+        console.error('Failed to copy link:', err);
       }
-    } catch (error) {
-      console.error('Error fetching property:', error);
-    } finally {
-      setLoading(false);
     }
-  }
-
-  async function handleDeleteProperty() {
-    if (!property) return;
-
-    const confirmDelete = window.confirm(
-      'Are you sure you want to delete this property? This action cannot be undone.'
-    );
-
-    if (!confirmDelete) return;
-
-    setIsDeleting(true);
-    try {
-      const { error } = await supabase
-        .from('properties')
-        .delete()
-        .eq('id', property.id);
-
-      if (error) throw error;
-
-      alert('Property deleted successfully!');
-      router.push('/properties');
-    } catch (error) {
-      console.error('Error deleting property:', error);
-      alert('Failed to delete property. Please try again.');
-    } finally {
-      setIsDeleting(false);
-    }
-  }
-
-  const nextImage = () => {
-    if (images.length === 0) return;
-    setCurrentImageIndex((prev) => (prev + 1) % images.length);
-  };
-
-  const prevImage = () => {
-    if (images.length === 0) return;
-    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-LK', {
-      style: 'currency',
-      currency: 'LKR',
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
+  }, [property?.title, property?.description]);
 
   if (loading) {
     return (
@@ -212,7 +114,7 @@ export default function PropertyDetailsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <Card className="overflow-hidden">
-              <div className="relative h-96 md:h-[500px] bg-gray-900">
+              <div className="relative h-64 md:h-[500px] bg-gray-900">
                 <img
                   src={currentImage}
                   alt={property.title}
@@ -245,18 +147,12 @@ export default function PropertyDetailsPage() {
                     </div>
                   </>
                 )}
-                <div className="absolute top-4 right-4 flex gap-2">
+                <div className="absolute top-4 right-4">
                   <Button
                     size="icon"
                     variant="ghost"
                     className="bg-white/90 hover:bg-white"
-                  >
-                    <Heart className="h-5 w-5" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="bg-white/90 hover:bg-white"
+                    onClick={handleShare}
                   >
                     <Share2 className="h-5 w-5" />
                   </Button>
@@ -264,8 +160,8 @@ export default function PropertyDetailsPage() {
               </div>
               {otherImages.length > 0 && (
                 <div
-                  className="p-4 grid gap-2"
-                  style={{ gridTemplateColumns: `repeat(${otherImages.length}, minmax(0, 1fr))` }}
+                  className="p-2 sm:p-4 grid gap-1 sm:gap-2"
+                  style={{ gridTemplateColumns: `repeat(auto-fit, minmax(60px, 1fr))` }}
                 >
                   {otherImages.map((img) => {
                     const realIndex = images.findIndex((i) => i.id === img.id);
@@ -276,7 +172,7 @@ export default function PropertyDetailsPage() {
                           if (realIndex >= 0) setCurrentImageIndex(realIndex);
                           setShowLightbox(true);
                         }}
-                        className={`h-20 rounded-lg overflow-hidden border-2 ${
+                        className={`h-14 sm:h-20 rounded-lg overflow-hidden border-2 ${
                           realIndex === currentImageIndex ? 'border-blue-600' : 'border-transparent'
                         }`}
                       >
@@ -366,12 +262,12 @@ export default function PropertyDetailsPage() {
                       <Badge className="bg-yellow-600">Featured</Badge>
                     )}
                   </div>
-                  <h1 className="text-2xl md:text-3xl font-bold mb-1 sm:mb-4">{property.title}</h1>
-                  <div className="flex items-center text-gray-600 text-base md:text-2xl mb-1 sm:mb-4">
-                    <MapPin className="h-5 w-5 mr-2" />
+                  <h1 className="text-2xl md:text-3xl font-bold mb-1 sm:mb-3">{property.title}</h1>
+                  <div className="flex items-center text-gray-600 text-sm md:text-xl mb-1 sm:mb-4">
+                    <MapPin className="h-4 w-4 mr-2" />
                     {property.location}, {property.city}, {property.district}
                   </div>
-                  <div className="text-2xl md:text-4xl font-bold text-blue-600">
+                  <div className="text-xl md:text-3xl font-bold text-blue-600 -mb-3 sm:mb-0">
                     {formatPrice(property.price)}
                   </div>
                 </div>
@@ -471,7 +367,11 @@ export default function PropertyDetailsPage() {
                       aria-label={`Open WhatsApp chat with ${(property as any).whatsapp_number}`}
                     >
                       <Button className="w-full bg-green-500 hover:bg-green-600 py-3 flex items-center justify-center gap-2">
-                        <MessageSquare className="h-5 w-5 text-white" />
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-circle-code-icon lucide-message-circle-code text-white">
+                          <path d="m10 9-3 3 3 3"/>
+                          <path d="m14 15 3-3-3-3"/>
+                          <path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/>
+                        </svg>
                         <span className="text-white font-medium">{(property as any).whatsapp_number}</span>
                       </Button>
                     </a>
