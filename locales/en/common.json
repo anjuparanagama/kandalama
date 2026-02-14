@@ -34,5 +34,34 @@
   },
   "terms": {
     "title": "Terms of Service"
+  },
+  "forgotPassword": {
+    "title": "Forgot Password",
+    "description": "Enter your email address and we'll send you a link to reset your password.",
+    "emailLabel": "Email Address",
+    "sendButton": "Send Reset Link",
+    "sending": "Sending...",
+    "successTitle": "Reset Link Sent",
+    "successMessage": "Check your email for a password reset link. The link will expire in 24 hours.",
+    "rememberPassword": "Remember your password?",
+    "backToLoginLink": "Back to Login",
+    "panelTitle": "Forgot Your Password?",
+    "panelSubtitle": "Don't worry, we'll help you reset it"
+  },
+  "resetPassword": {
+    "title": "Reset Password",
+    "newPasswordLabel": "New Password",
+    "confirmPasswordLabel": "Confirm Password",
+    "passwordHint": "Password must be at least 6 characters long",
+    "resetButton": "Reset Password",
+    "updating": "Updating...",
+    "successTitle": "Password Reset Successfully",
+    "successMessage": "Your password has been updated. You will be redirected to the login page.",
+    "redirecting": "Redirecting to login...",
+    "passwordMismatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters long",
+    "backToLogin": "Back to Login",
+    "panelTitle": "Create New Password",
+    "panelSubtitle": "Secure your account with a new password"
   }
 }
