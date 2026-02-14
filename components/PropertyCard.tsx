@@ -1,7 +1,7 @@
 'use client';
 
 import { Property } from '@/lib/supabase';
-import { MapPin, Bed, Bath, Maximize, Heart } from 'lucide-react';
+import { MapPin, Bed, Bath, Maximize } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -29,19 +29,12 @@ export default function PropertyCard({ property, horizontal = false }: PropertyC
     return (
       <Card className="overflow-hidden hover:shadow-lg transition-shadow">
         <div className="flex flex-col md:flex-row">
-          <div className="relative w-full md:w-80 h-64 md:h-auto">
+          <div className="relative w-full md:w-80 h-64 md:h-auto border-b md:border-b-0 md:border-r border-gray-200">
             <img
               src={primaryImage}
               alt={property.title}
               className="w-full h-full object-cover"
             />
-            <Button
-              size="icon"
-              variant="ghost"
-              className="absolute top-3 right-3 bg-white/90 hover:bg-white"
-            >
-              <Heart className="h-5 w-5" />
-            </Button>
             {property.is_featured && (
               <Badge className="absolute top-3 left-3 bg-blue-600">
                 Featured
@@ -60,7 +53,7 @@ export default function PropertyCard({ property, horizontal = false }: PropertyC
                   For {property.listing_type}
                 </Badge>
               </div>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-base sm:text-2xl font-bold text-blue-600">
                 {formatPrice(property.price)}
               </p>
               <div className="flex items-center text-gray-600 text-sm">
@@ -97,19 +90,12 @@ export default function PropertyCard({ property, horizontal = false }: PropertyC
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow group">
-      <div className="relative h-56 overflow-hidden">
+      <div className="relative h-56 overflow-hidden border-b-2 border-gray-200">
         <img
           src={primaryImage}
           alt={property.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
         />
-        <Button
-          size="icon"
-          variant="ghost"
-          className="absolute top-3 right-3 bg-white/90 hover:bg-white"
-        >
-          <Heart className="h-5 w-5" />
-        </Button>
         {property.is_featured && (
           <Badge className="absolute top-3 left-3 bg-blue-600">
             Featured
@@ -124,11 +110,11 @@ export default function PropertyCard({ property, horizontal = false }: PropertyC
       </div>
       <CardContent className="p-4 space-y-3">
         <Link href={`/properties/${property.id}`}>
-          <h3 className="text-lg font-semibold hover:text-blue-600 transition line-clamp-2">
+          <h3 className="text-lg md:text-xl font-semibold hover:text-blue-600 transition line-clamp-2 -mb-3 ">
             {property.title}
           </h3>
         </Link>
-        <p className="text-2xl font-bold text-blue-600">
+        <p className="text-base sm:text-xl font-bold text-blue-600">
           {formatPrice(property.price)}
         </p>
         <div className="flex items-center text-gray-600 text-sm">

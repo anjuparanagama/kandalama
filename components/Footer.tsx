@@ -13,8 +13,8 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="space-y-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="col-span-full sm:col-span-1 space-y-2">
             <div className="flex items-center -space-x-2">
               <Link href="/" className="flex items-center -space-x-5">
                 <div className="p-2 -ml-4 rounded-lg">
@@ -39,7 +39,7 @@ export default function Footer() {
             </p>
           </div>
 
-          <div>
+          <div className="hidden sm:block">
             <h3 className="text-white font-semibold mb-4">Quick Links</h3>
             <hr className="border-gray-500 w-24 -mt-4 mb-2" />
             <ul className="space-y-2">
