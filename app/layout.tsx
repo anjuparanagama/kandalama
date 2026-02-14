@@ -9,6 +9,7 @@ import I18nProvider from '@/components/I18nProvider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
   title: 'Kandalama Lk - Buy, Sell, and Rent Properties in Sri Lanka',
   description: 'Sri Lanka\'s trusted property marketplace for buying, selling, and renting houses, lands, commercial properties, and more.',
   openGraph: {
