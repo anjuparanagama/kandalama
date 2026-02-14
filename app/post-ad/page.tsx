@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,13 +19,16 @@ import { getDistrictsByLanguage } from '../../constant/district';
 import { Upload, ChevronRight, ChevronLeft, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useCloudinaryUpload } from '@/hooks/useCloudinaryUpload';
+import { toast } from 'sonner';
 
 export default function PostAdPage() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
+  const isSubmittingRef = useRef(false);
   const [step, setStep] = useState(1);
   const districts = getDistrictsByLanguage(i18n.language);
   const [loading, setLoading] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
   const [uploadProgress, setUploadProgress] = useState(0);
   const { uploadMultiple, uploading: uploadingToCloudinary } = useCloudinaryUpload({
     onProgress: (current, total) => {
@@ -51,8 +54,33 @@ export default function PostAdPage() {
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
 
+  // Check authentication on page load
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          router.push('/login?redirect=/post-ad');
+          return;
+        }
+        setAuthLoading(false);
+      } catch (error) {
+        console.error('Auth check error:', error);
+        router.push('/login?redirect=/post-ad');
+      }
+    };
+    checkAuth();
+  }, [router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (isSubmittingRef.current) {
+      return;
+    }
+    
+    isSubmittingRef.current = true;
     setLoading(true);
     setUploadProgress(0);
 
@@ -115,17 +143,17 @@ export default function PostAdPage() {
         } catch (uploadError) {
           console.error('Image upload failed:', uploadError);
           // Continue - property was created even if images failed
-          alert('Property created successfully, but image upload failed. You can add images later by editing the property.');
+          toast.warning('Property created successfully, but image upload failed. You can add images later by editing the property.', { duration: 5000 });
         }
       }
 
+      toast.success('Property posted successfully!', { duration: 3000 });
       router.push(`/properties/${property.id}`);
     } catch (error) {
       console.error('Error posting ad:', error);
-      alert('Failed to post advertisement. Please try again.');
-    } finally {
+      toast.error('Failed to post advertisement. Please try again.', { duration: 5000 });
+      isSubmittingRef.current = false;
       setLoading(false);
-      setUploadProgress(0);
     }
   };
 
@@ -144,50 +172,59 @@ export default function PostAdPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-6 md:py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-5">
-          <h1 className="text-lg md:text-2xl font-bold text-blue-900 text-center sm:text-start ">{t('postAd.title')}</h1>
-          <p className="text-gray-500 text-xs sm:text-base text-center sm:text-start">
-            Fill in the details to list your property
-          </p>
-        </div>
+        {authLoading ? (
+          <div className="flex items-center justify-center h-96">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+              <p className="mt-4 text-gray-600">Verifying your login...</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="mb-5">
+              <h1 className="text-lg md:text-2xl font-bold text-blue-900 text-center sm:text-start ">{t('postAd.title')}</h1>
+              <p className="text-gray-500 text-xs sm:text-base text-center sm:text-start">
+                Fill in the details to list your property
+              </p>
+            </div>
 
-        <div className="mb-8">
-          <div className="flex items-center justify-between px-8 sm:px-0 ">
-            {[1, 2, 3].map((s) => (
-              <div key={s} className="flex items-center">
-                <div
-                  className={`w-6 h-6 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-semibold ${
-                    s <= step
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-600'
-                  }`}
-                >
-                  {s}
-                </div>
-                {s < 3 && (
-                  <div
-                    className={`h-1 w-20 sm:w-24 md:w-48 mx-2 ${
-                      s < step ? 'bg-blue-600' : 'bg-gray-200'
-                    }`}
-                  ></div>
-                )}
+            <div className="mb-8">
+              <div className="flex items-center justify-between px-8 sm:px-0 ">
+                {[1, 2, 3].map((s) => (
+                  <div key={s} className="flex items-center">
+                    <div
+                      className={`w-6 h-6 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-semibold ${
+                        s <= step
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 text-gray-600'
+                      }`}
+                    >
+                      {s}
+                    </div>
+                    {s < 3 && (
+                      <div
+                        className={`h-1 w-20 sm:w-24 md:w-48 mx-2 ${
+                          s < step ? 'bg-blue-600' : 'bg-gray-200'
+                        }`}
+                      ></div>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="flex justify-between mt-2 text-sm sm:text-base px-4 sm:px-0">
-            <span className={step >= 1 ? 'text-blue-600 font-semibold' : ''}>
-              Basic Info
-            </span>
-            <span className={step >= 2 ? 'text-blue-600 font-semibold' : ''}>
-              Details
-            </span>
-            <span className={step >= 3 ? 'text-blue-600 font-semibold' : ''}>
-              Contact
-            </span>
-          </div>
-        </div>
+              <div className="flex justify-between mt-2 text-sm sm:text-base px-4 sm:px-0">
+                <span className={step >= 1 ? 'text-blue-600 font-semibold' : ''}>
+                  Basic Info
+                </span>
+                <span className={step >= 2 ? 'text-blue-600 font-semibold' : ''}>
+                  Details
+                </span>
+                <span className={step >= 3 ? 'text-blue-600 font-semibold' : ''}>
+                  Contact
+                </span>
+              </div>
+            </div>
 
-        <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
           <Card>
             <CardHeader>
               <CardTitle className="text-lg sm:text-xl -mb-3 sm:mb-0 text-center sm:text-left text-blue-950">
@@ -421,7 +458,7 @@ export default function PostAdPage() {
                           if (!files) return;
                           const selected = Array.from(files);
                           if (images.length + selected.length > 6) {
-                            alert('You can upload up to 6 images only.');
+                            toast.error('You can upload up to 6 images only.', { duration: 3000 });
                             return;
                           }
                           const newPreviews = selected.map((file) => URL.createObjectURL(file));
@@ -513,7 +550,7 @@ export default function PostAdPage() {
                             ? formData.map_link
                             : `https://www.google.com/maps?q=${encodeURIComponent(`${formData.location} ${formData.city} ${formData.district}`)}`;
                           navigator.clipboard?.writeText(link);
-                          alert('Map link copied to clipboard');
+                          toast.success('Map link copied to clipboard', { duration: 2000 });
                         }}
                         className="text-sm px-3 py-1 border rounded"
                       >
@@ -560,6 +597,8 @@ export default function PostAdPage() {
             )}
           </div>
         </form>
+          </>
+        )}
       </div>
     </div>
   );

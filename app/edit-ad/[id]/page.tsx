@@ -18,6 +18,7 @@ import { supabase, Property } from '@/lib/supabase';
 import { getDistrictsByLanguage } from '../../../constant/district';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import Link from 'next/link';
 
 export default function EditAdPage() {
@@ -131,11 +132,11 @@ export default function EditAdPage() {
 
       if (error) throw error;
 
-      alert('Property updated successfully!');
+      toast.success('Property updated successfully!', { duration: 3000 });
       router.push(`/properties/${params.id}`);
     } catch (error) {
       console.error('Error updating property:', error);
-      alert('Failed to update property. Please try again.');
+      toast.error('Failed to update property. Please try again.');
     } finally {
       setSaving(false);
     }

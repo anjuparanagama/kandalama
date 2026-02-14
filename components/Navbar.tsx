@@ -6,6 +6,17 @@ import { Search, Menu, X, Plus, LogIn, Globe, ChevronDown, LogOut, User, Package
 import localFont from 'next/font/local';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@/components/ui/alert-dialog';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
@@ -46,7 +57,13 @@ export default function Navbar() {
         userMenuRef.current &&
         !userMenuRef.current.contains(e.target as Node)
       ) {
-        setShowUserMenu(false);
+        // Check if click is on AlertDialog (backdrop/overlay)
+        const target = e.target as HTMLElement;
+        const isDialogContent = target.closest('[role="alertdialog"]') || 
+                               target.closest('[data-state="open"]');
+        if (!isDialogContent) {
+          setShowUserMenu(false);
+        }
       }
     };
     document.addEventListener('mousedown', handleClick);
@@ -92,8 +109,16 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
+      console.log('logout: initiating signOut');
       await supabase.auth.signOut();
+      console.log('logout: signOut completed');
       setUser(null);
+      // redirect to home after logout
+      try {
+        router.push('/');
+      } catch (err) {
+        console.warn('Router push after logout failed', err);
+      }
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -216,16 +241,35 @@ export default function Navbar() {
 
                     {/* Logout button */}
                     <div className="border-t border-gray-100 py-2">
-                      <button
-                        onClick={() => {
-                          handleLogout();
-                          setShowUserMenu(false);
-                        }}
-                        className="w-full text-left px-5 py-3 hover:bg-red-50 text-red-600 flex items-center gap-3 transition-colors duration-150 group"
-                      >
-                        <LogOut className="h-4 w-4 group-hover:text-red-700" />
-                        <span className="font-medium">Logout</span>
-                      </button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button
+                            className="w-full text-left px-5 py-3 hover:bg-red-50 text-red-600 flex items-center gap-3 transition-colors duration-150 group"
+                            type="button"
+                          >
+                            <LogOut className="h-4 w-4 group-hover:text-red-700" />
+                            <span className="font-medium">Logout</span>
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirm logout</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to log out? You will need to sign in again to access your account.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel asChild>
+                              <Button variant="outline">Cancel</Button>
+                            </AlertDialogCancel>
+                            <AlertDialogAction asChild>
+                              <Button onClick={() => { handleLogout(); setShowUserMenu(false); }} className="bg-red-500 hover:bg-red-600 text-white">
+                                Logout
+                              </Button>
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 )}
@@ -305,10 +349,32 @@ export default function Navbar() {
               </Button>
             </Link>
             {user && (
-              <Button onClick={handleLogout} className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg">
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirm logout</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to log out? You will need to sign in again to access your account.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel asChild>
+                      <Button variant="outline">Cancel</Button>
+                    </AlertDialogCancel>
+                    <AlertDialogAction asChild>
+                      <Button onClick={() => { handleLogout(); }} className="bg-red-500 hover:bg-red-600 text-white">
+                        Logout
+                      </Button>
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
             <div className="mt-4 pt-3 border-t border-white/20">
               <p className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-2 px-1">Language</p>

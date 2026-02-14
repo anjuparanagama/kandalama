@@ -7,6 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   MapPin,
   Bed,
   Bath,
@@ -15,9 +24,11 @@ import {
   Trash2,
   Plus,
   ChevronLeft,
+  AlertTriangle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 export default function MyAdsPage() {
   const { t } = useTranslation();
@@ -25,6 +36,8 @@ export default function MyAdsPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(null);
 
   useEffect(() => {
     fetchUserProperties();
@@ -53,33 +66,36 @@ export default function MyAdsPage() {
       setProperties((data as any) || []);
     } catch (error) {
       console.error('Error fetching properties:', error);
-      alert('Failed to load your ads. Please try again.');
+      toast.error('Failed to load your ads. Please try again.', { duration: 5000 });
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleDeleteProperty(propertyId: string) {
-    const confirmDelete = window.confirm(
-      'Are you sure you want to delete this property? This action cannot be undone.'
-    );
+  function openDeleteDialog(property: Property) {
+    setPropertyToDelete(property);
+    setDeleteDialogOpen(true);
+  }
 
-    if (!confirmDelete) return;
+  async function confirmDelete() {
+    if (!propertyToDelete) return;
 
-    setDeleting(propertyId);
+    setDeleting(propertyToDelete.id);
     try {
       const { error } = await supabase
         .from('properties')
         .delete()
-        .eq('id', propertyId);
+        .eq('id', propertyToDelete.id);
 
       if (error) throw error;
 
-      setProperties((prev) => prev.filter((p) => p.id !== propertyId));
-      alert('Property deleted successfully!');
+      setProperties((prev) => prev.filter((p) => p.id !== propertyToDelete.id));
+      setDeleteDialogOpen(false);
+      setPropertyToDelete(null);
+      toast.success('Property deleted successfully!', { duration: 3000 });
     } catch (error) {
       console.error('Error deleting property:', error);
-      alert('Failed to delete property. Please try again.');
+      toast.error('Failed to delete property. Please try again.', { duration: 5000 });
     } finally {
       setDeleting(null);
     }
@@ -214,7 +230,7 @@ export default function MyAdsPage() {
                           </Link>
                           <Button
                             className="bg-red-600 hover:bg-red-700"
-                            onClick={() => handleDeleteProperty(property.id)}
+                            onClick={() => openDeleteDialog(property)}
                             disabled={deleting === property.id}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
@@ -238,6 +254,45 @@ export default function MyAdsPage() {
             </div>
           </div>
         )}
+
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent className="border-red-200 bg-white">
+            <AlertDialogHeader>
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
+                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                </div>
+                <AlertDialogTitle className="text-lg font-semibold text-red-900">
+                  Delete Property
+                </AlertDialogTitle>
+              </div>
+            </AlertDialogHeader>
+            <div className="space-y-3">
+              {propertyToDelete && (
+                <>
+                  <AlertDialogDescription className="text-gray-700">
+                    Are you sure you want to delete <span className="font-semibold text-gray-900">"{propertyToDelete.title}"</span>?
+                  </AlertDialogDescription>
+                  <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                    ⚠️ This action cannot be undone. The property and all related images will be permanently deleted.
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="flex gap-3 pt-4">
+              <AlertDialogCancel className="border-gray-300 hover:bg-gray-100">
+                Keep It
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDelete}
+                disabled={deleting !== null}
+                className="bg-red-600 text-white hover:bg-red-700"
+              >
+                {deleting ? 'Deleting...' : 'Delete Property'}
+              </AlertDialogAction>
+            </div>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
