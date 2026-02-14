@@ -20,6 +20,7 @@ export default function RegisterPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,6 +30,25 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    // Validate username
+    if (!username.trim()) {
+      setError('Username is required');
+      setLoading(false);
+      return;
+    }
+
+    if (username.length < 3) {
+      setError('Username must be at least 3 characters');
+      setLoading(false);
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_.-]+$/.test(username)) {
+      setError('Username can only contain letters, numbers, underscores, dots, and hyphens');
+      setLoading(false);
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -43,12 +63,38 @@ export default function RegisterPage() {
     }
 
     try {
+      // Check if username is already taken
+      const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('username', username.toLowerCase())
+        .single();
+
+      if (existingUser) {
+        setError('Username is already taken');
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
 
       if (error) throw error;
+
+      if (data.user) {
+        // Create profile with username
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            email,
+            username: username.toLowerCase(),
+          });
+
+        if (profileError) throw profileError;
+      }
 
       router.push('/login?message=Check your email to confirm your account');
     } catch (error: any) {
@@ -101,6 +147,19 @@ export default function RegisterPage() {
                       onChange={(e) => setEmail(e.target.value)}
                       required
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                      id="username"
+                      type="text"
+                      placeholder="your_username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required
+                    />
+                    <p className="text-xs text-gray-500">3+ characters, letters, numbers, underscores or hyphens</p>
                   </div>
 
                   <div className="space-y-2">
