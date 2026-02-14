@@ -162,9 +162,9 @@ export default function Home() {
       )}
 
       {!loading && latestProperties.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold">Latest Listings</h2>
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-16">
+          <div className="flex justify-between items-center mb-5 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold">Latest Listings</h2>
             <Link href="/properties">
               <Button variant="outline">View All</Button>
             </Link>
