@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useState, useMemo, useRef, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getDistrictsByLanguage } from '@/constant/district';
 import { propertyTypes } from '@/constant/property-Types';
 import { useTranslation } from 'react-i18next';
@@ -58,8 +59,21 @@ function DistrictSelect() {
 }
 
 export default function FilterSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { t } = useTranslation();
-  const [priceRange, setPriceRange] = useState([0, 100000000]);
+  
+  const [listingType, setListingType] = useState(searchParams.get('listing_type') || 'all');
+  const [propertyType, setPropertyType] = useState(searchParams.get('category') || 'all');
+  const [location, setLocation] = useState(searchParams.get('location') || '');
+  const [district, setDistrict] = useState(searchParams.get('district') || 'all');
+  const [priceRange, setPriceRange] = useState([
+    parseInt(searchParams.get('minPrice') || '0'),
+    parseInt(searchParams.get('maxPrice') || '100000000')
+  ]);
+  const [bedrooms, setBedrooms] = useState(searchParams.get('bedrooms') || 'any');
+  const [bathrooms, setBathrooms] = useState(searchParams.get('bathrooms') || 'any');
+  
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Handle click outside to close sidebar
@@ -75,6 +89,34 @@ export default function FilterSidebar({ isOpen, onClose }: { isOpen?: boolean; o
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, onClose]);
+
+  const handleApplyFilters = () => {
+    const params = new URLSearchParams();
+    
+    if (listingType !== 'all') params.set('listing_type', listingType);
+    if (propertyType !== 'all') params.set('category', propertyType);
+    if (location.trim()) params.set('location', location.trim());
+    if (district !== 'all') params.set('district', district);
+    if (priceRange[0] > 0) params.set('minPrice', priceRange[0].toString());
+    if (priceRange[1] < 100000000) params.set('maxPrice', priceRange[1].toString());
+    if (bedrooms !== 'any') params.set('bedrooms', bedrooms);
+    if (bathrooms !== 'any') params.set('bathrooms', bathrooms);
+
+    router.push(`/properties?${params.toString()}`);
+    onClose?.();
+  };
+
+  const handleClearFilters = () => {
+    setListingType('all');
+    setPropertyType('all');
+    setLocation('');
+    setDistrict('all');
+    setPriceRange([0, 100000000]);
+    setBedrooms('any');
+    setBathrooms('any');
+    router.push('/properties');
+    onClose?.();
+  };
 
   return (
     <aside ref={sidebarRef}>
@@ -94,7 +136,7 @@ export default function FilterSidebar({ isOpen, onClose }: { isOpen?: boolean; o
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label>Listing Type</Label>
-            <Select>
+            <Select value={listingType} onValueChange={setListingType}>
               <SelectTrigger>
                 <SelectValue placeholder="All" />
               </SelectTrigger>
@@ -108,11 +150,12 @@ export default function FilterSidebar({ isOpen, onClose }: { isOpen?: boolean; o
 
           <div className="space-y-2">
             <Label>Property Type</Label>
-            <Select>
+            <Select value={propertyType} onValueChange={setPropertyType}>
               <SelectTrigger>
                 <SelectValue placeholder="All Properties" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">All Properties</SelectItem>
                 {propertyTypes.map((type) => (
                   <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
                 ))}
@@ -122,15 +165,30 @@ export default function FilterSidebar({ isOpen, onClose }: { isOpen?: boolean; o
 
           <div className="space-y-2">
             <Label>Location</Label>
-            <Input placeholder="Enter city or district" />
+            <Input 
+              placeholder="Enter city or district" 
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
           </div>
-
 
           <div className="space-y-2">
             <Label>District</Label>
-            <DistrictSelect />
+            <Select value={district} onValueChange={setDistrict}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Districts" />
+              </SelectTrigger>
+              <SelectContent>
+                {/* District select logic here */}
+                <SelectItem value="all">All Districts</SelectItem>
+                {getDistrictsByLanguage().map((dist) => (
+                  <SelectItem key={dist} value={dist}>
+                    {dist}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-
 
           <div className="space-y-4">
             <Label>
@@ -150,7 +208,7 @@ export default function FilterSidebar({ isOpen, onClose }: { isOpen?: boolean; o
 
           <div className="space-y-2">
             <Label>Bedrooms</Label>
-            <Select>
+            <Select value={bedrooms} onValueChange={setBedrooms}>
               <SelectTrigger>
                 <SelectValue placeholder="Any" />
               </SelectTrigger>
@@ -167,7 +225,7 @@ export default function FilterSidebar({ isOpen, onClose }: { isOpen?: boolean; o
 
           <div className="space-y-2">
             <Label>Bathrooms</Label>
-            <Select>
+            <Select value={bathrooms} onValueChange={setBathrooms}>
               <SelectTrigger>
                 <SelectValue placeholder="Any" />
               </SelectTrigger>
@@ -182,10 +240,10 @@ export default function FilterSidebar({ isOpen, onClose }: { isOpen?: boolean; o
           </div>
 
           <div className="space-y-3 pt-4">
-            <Button className="w-full bg-blue-600 hover:bg-blue-700">
+            <Button onClick={handleApplyFilters} className="w-full bg-blue-600 hover:bg-blue-700">
               Apply Filters
             </Button>
-            <Button variant="outline" className="w-full">
+            <Button onClick={handleClearFilters} variant="outline" className="w-full">
               Clear Filters
             </Button>
           </div>

@@ -41,7 +41,7 @@ export default function Home() {
         `)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
-        .limit(8);
+        .limit(6);
 
       if (featured) setFeaturedProperties(featured as any);
       if (latest) setLatestProperties(latest as any);
@@ -169,7 +169,7 @@ export default function Home() {
               <Button variant="outline">View All</Button>
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {latestProperties.map((property) => (
               <PropertyCard key={property.id} property={property} />
             ))}
@@ -179,8 +179,8 @@ export default function Home() {
 
       {loading && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="h-80 bg-gray-200 animate-pulse rounded-lg"></div>
             ))}
           </div>

@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { supabase, Property, PropertyImage } from '@/lib/supabase';
-import dummyProperties from '@/lib/dummyData';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +19,8 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  Edit2,
+  Trash2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 export default function PropertyDetailsPage() {
   const { t } = useTranslation();
   const params = useParams();
+  const router = useRouter();
   const [property, setProperty] = useState<Property | null>(null);
   const [images, setImages] = useState<PropertyImage[]>([]);
   const [showLightbox, setShowLightbox] = useState(false);
@@ -34,12 +36,27 @@ export default function PropertyDetailsPage() {
   const [similarProperties, setSimilarProperties] = useState<Property[]>([]);
   const [seller, setSeller] = useState<{ name?: string; avatar_url?: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (params.id) {
+      fetchCurrentUser();
       fetchProperty(params.id as string);
     }
   }, [params.id]);
+
+  async function fetchCurrentUser() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUser({ id: user.id });
+      }
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+    }
+  }
 
   async function fetchProperty(id: string) {
     try {
@@ -53,6 +70,14 @@ export default function PropertyDetailsPage() {
         .maybeSingle();
       if (propertyData) {
         setProperty(propertyData as any);
+        
+        // Check if current user is the owner
+        if (currentUser && (propertyData as any).user_id === currentUser.id) {
+          setIsOwner(true);
+        } else {
+          setIsOwner(false);
+        }
+        
         const sortedImages = (propertyData as any).property_images?.sort(
           (a: PropertyImage, b: PropertyImage) => a.display_order - b.display_order
         ) || [];
@@ -91,22 +116,39 @@ export default function PropertyDetailsPage() {
           .limit(4);
 
         if (similar) setSimilarProperties(similar as any);
-      } else if (process.env.NODE_ENV === 'development') {
-        const demo = dummyProperties.find((p) => p.id === id);
-        if (demo) {
-          setProperty(demo as any);
-            // limit to max 6 images (1 main + 5 thumbnails)
-            setImages(((demo.property_images || []) as PropertyImage[]).slice(0, 6));
-          setSeller({ name: (demo as any).seller_name, avatar_url: (demo as any).seller_avatar });
-          setSimilarProperties(
-            dummyProperties.filter((p) => p.category === demo.category && p.id !== demo.id).slice(0, 4) as any
-          );
-        }
       }
     } catch (error) {
       console.error('Error fetching property:', error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDeleteProperty() {
+    if (!property) return;
+
+    const confirmDelete = window.confirm(
+      'Are you sure you want to delete this property? This action cannot be undone.'
+    );
+
+    if (!confirmDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', property.id);
+
+      if (error) throw error;
+
+      alert('Property deleted successfully!');
+      router.push('/properties');
+    } catch (error) {
+      console.error('Error deleting property:', error);
+      alert('Failed to delete property. Please try again.');
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -378,6 +420,24 @@ export default function PropertyDetailsPage() {
           <div className="lg:col-span-1">
             <Card className="sticky top-24">
               <CardContent className="p-6 space-y-4">
+                {isOwner && (
+                  <div className="space-y-2 border-b pb-4">
+                    <Link href={`/edit-ad/${property.id}`}>
+                      <Button className="w-full bg-blue-600 hover:bg-blue-700" disabled={isDeleting}>
+                        <Edit2 className="h-4 w-4 mr-2" />
+                        Edit Property
+                      </Button>
+                    </Link>
+                    <Button
+                      className="w-full bg-red-600 hover:bg-red-700"
+                      onClick={handleDeleteProperty}
+                      disabled={isDeleting}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      {isDeleting ? 'Deleting...' : 'Delete Property'}
+                    </Button>
+                  </div>
+                )}
                 <div className="space-y-4 flex flex-col">
                 <div className="flex items-center justify-between">
                   <div>
