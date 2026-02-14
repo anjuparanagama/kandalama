@@ -29,7 +29,7 @@ export default function CategoryCard({
             <Icon className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600 group-hover:text-white transition" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3>{t('properties.title')}</h3>
+            <h3 className="text-sm sm:text-base font-semibold truncate">{title}</h3>
             {count !== undefined && (
               <p className="text-[10px] text-gray-400 text-center sm:text-left">{formatNumber(count)} ads</p>
             )}

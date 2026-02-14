@@ -136,7 +136,6 @@ kandalama/
 │
 ├── lib/                         # Utility functions & config
 │   ├── supabase.ts             # Supabase client & types
-│   ├── dummyData.ts            # Sample data
 │   └── utils.ts                # Utility functions
 │
 ├── public/                      # Static assets
