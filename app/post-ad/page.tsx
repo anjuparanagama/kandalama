@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
 import { getDistrictsByLanguage } from '../../constant/district';
+import { getCitiesByDistrict } from '@/constant/cities';
 import { Upload, ChevronRight, ChevronLeft, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useCloudinaryUpload } from '@/hooks/useCloudinaryUpload';
@@ -372,24 +373,14 @@ export default function PostAdPage() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="city">City *</Label>
-                      <Input
-                        id="city"
-                        placeholder="e.g., Colombo"
-                        value={formData.city}
-                        onChange={(e) => updateFormData('city', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
+                                        <div className="space-y-2">
                       <Label htmlFor="district">District *</Label>
                       <Select
                         value={formData.district}
-                        onValueChange={(value) =>
-                          updateFormData('district', value)
-                        }
+                        onValueChange={(value) => {
+                          updateFormData('district', value);
+                          updateFormData('city', '');
+                        }}
                         required
                       >
                         <SelectTrigger>
@@ -398,6 +389,24 @@ export default function PostAdPage() {
                         <SelectContent>
                           {districts.map((district) => (
                             <SelectItem key={district} value={district}>{district}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="city">City *</Label>
+                      <Select
+                        value={formData.city}
+                        onValueChange={(value) => updateFormData('city', value)}
+                        disabled={!formData.district}
+                        required
+                      >
+                        <SelectTrigger className={!formData.district ? 'opacity-50 cursor-not-allowed' : ''}>
+                          <SelectValue placeholder={!formData.district ? 'Select district first' : 'Select city'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {formData.district && getCitiesByDistrict(formData.district).map((city) => (
+                            <SelectItem key={city} value={city}>{city}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>

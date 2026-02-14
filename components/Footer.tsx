@@ -91,32 +91,25 @@ export default function Footer() {
             <hr className="border-gray-500 w-20 -mt-4 mb-3" />
             <div className="flex space-x-4">
               <a
-                href="#"
+                href="https://www.facebook.com/share/1CH4b326bu/"
                 className="hover:text-white transition"
                 aria-label="Facebook"
               >
                 <Facebook className="h-6 w-6" />
               </a>
               <a
-                href="#"
+                href="https://www.facebook.com/share/1CH4b326bu/"
                 className="hover:text-white transition"
                 aria-label="Twitter"
               >
                 <Twitter className="h-6 w-6" />
               </a>
               <a
-                href="#"
+                href="https://www.facebook.com/share/1CH4b326bu/"
                 className="hover:text-white transition"
                 aria-label="Instagram"
               >
                 <Instagram className="h-6 w-6" />
-              </a>
-              <a
-                href="#"
-                className="hover:text-white transition"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="h-6 w-6" />
               </a>
             </div>
           </div>

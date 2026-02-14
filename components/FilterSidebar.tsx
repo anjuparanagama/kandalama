@@ -15,6 +15,7 @@ import {
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getDistrictsByLanguage } from '@/constant/district';
+import { getCitiesByDistrict } from '@/constant/cities';
 import { propertyTypes } from '@/constant/property-Types';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
@@ -67,6 +68,7 @@ export default function FilterSidebar({ isOpen, onClose }: { isOpen?: boolean; o
   const [propertyType, setPropertyType] = useState(searchParams.get('category') || 'all');
   const [location, setLocation] = useState(searchParams.get('location') || '');
   const [district, setDistrict] = useState(searchParams.get('district') || 'all');
+  const [city, setCity] = useState(searchParams.get('city') || 'all');
   const [priceRange, setPriceRange] = useState([
     parseInt(searchParams.get('minPrice') || '0'),
     parseInt(searchParams.get('maxPrice') || '100000000')
@@ -97,6 +99,7 @@ export default function FilterSidebar({ isOpen, onClose }: { isOpen?: boolean; o
     if (propertyType !== 'all') params.set('category', propertyType);
     if (location.trim()) params.set('location', location.trim());
     if (district !== 'all') params.set('district', district);
+    if (city !== 'all') params.set('city', city);
     if (priceRange[0] > 0) params.set('minPrice', priceRange[0].toString());
     if (priceRange[1] < 100000000) params.set('maxPrice', priceRange[1].toString());
     if (bedrooms !== 'any') params.set('bedrooms', bedrooms);
@@ -111,6 +114,7 @@ export default function FilterSidebar({ isOpen, onClose }: { isOpen?: boolean; o
     setPropertyType('all');
     setLocation('');
     setDistrict('all');
+    setCity('all');
     setPriceRange([0, 100000000]);
     setBedrooms('any');
     setBathrooms('any');
@@ -155,7 +159,6 @@ export default function FilterSidebar({ isOpen, onClose }: { isOpen?: boolean; o
                 <SelectValue placeholder="All Properties" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Properties</SelectItem>
                 {propertyTypes.map((type) => (
                   <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
                 ))}
@@ -164,17 +167,11 @@ export default function FilterSidebar({ isOpen, onClose }: { isOpen?: boolean; o
           </div>
 
           <div className="space-y-2">
-            <Label>Location</Label>
-            <Input 
-              placeholder="Enter city or district" 
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
             <Label>District</Label>
-            <Select value={district} onValueChange={setDistrict}>
+            <Select value={district} onValueChange={(value) => {
+              setDistrict(value);
+              setCity('all'); // Reset city when district changes
+            }}>
               <SelectTrigger>
                 <SelectValue placeholder="All Districts" />
               </SelectTrigger>
@@ -184,6 +181,23 @@ export default function FilterSidebar({ isOpen, onClose }: { isOpen?: boolean; o
                 {getDistrictsByLanguage().map((dist) => (
                   <SelectItem key={dist} value={dist}>
                     {dist}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>City</Label>
+            <Select value={city} onValueChange={setCity} disabled={district === 'all'}>
+              <SelectTrigger className={district === 'all' ? 'opacity-50 cursor-not-allowed' : ''}>
+                <SelectValue placeholder={district === 'all' ? 'Select a district first' : 'All Cities'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Cities</SelectItem>
+                {district !== 'all' && getCitiesByDistrict(district).map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
                   </SelectItem>
                 ))}
               </SelectContent>
