@@ -235,7 +235,7 @@ export default function PostAdPage() {
                     <Label htmlFor="area_sqft">Area (sqft) *</Label>
                     <Input
                       id="area_sqft"
-                      type="number"
+                      type="text"
                       placeholder="e.g., 2000"
                       value={formData.area_sqft}
                       onChange={(e) =>
