@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Exchange code for session
+  // Exchange code for session (authorization code flow)
   if (code) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -35,12 +35,6 @@ export async function GET(request: NextRequest) {
 
       // Set response with auth cookie
       const response = NextResponse.redirect(new URL(redirect, requestUrl.origin));
-      
-      // Copy auth headers from the session exchange
-      if (data.session?.access_token) {
-        response.headers.set('Set-Cookie', `sb-auth-token=${data.session.access_token}; Path=/; HttpOnly; Secure; SameSite=Lax`);
-      }
-
       return response;
     } catch (error) {
       console.error('Error exchanging code for session:', error);
@@ -50,6 +44,6 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // No code provided
-  return NextResponse.redirect(new URL('/', requestUrl.origin));
+  // If no code, just redirect to home
+  return NextResponse.redirect(new URL(redirect, requestUrl.origin));
 }
