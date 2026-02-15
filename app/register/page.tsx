@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/lib/supabase';
+import { getOAuthRedirectUrl } from '@/lib/auth-helpers';
 import { Home } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -63,7 +64,7 @@ export default function RegisterPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: getOAuthRedirectUrl('/auth/callback'),
         },
       });
 

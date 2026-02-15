@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/lib/supabase';
+import { getOAuthRedirectUrl } from '@/lib/auth-helpers';
 import localFont from 'next/font/local';
 import { useTranslation } from 'react-i18next';
 
@@ -51,7 +52,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
+          redirectTo: getOAuthRedirectUrl(`/auth/callback?redirect=${encodeURIComponent(redirect)}`),
         },
       });
 
