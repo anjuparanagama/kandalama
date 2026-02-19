@@ -1,0 +1,56 @@
+{
+  "title": "Terms & Conditions",
+  "subtitle": "Readable, summarized terms so you can quickly understand your rights and responsibilities.",
+  "lastUpdated": "Last updated: {{date}}",
+
+  "quickSummary": {
+    "title": "Quick summary",
+    "item1": "Be honest and accurate when posting property listings.",
+    "item2": "Verify buyers/sellers and meet safely — we don't mediate transactions.",
+    "item3": "We may remove content that breaks our rules or local laws."
+  },
+
+  "sections": {
+    "usingSite": {
+      "title": "1. Using the site",
+      "text": "You may browse listings for free. Creating an account and posting listings requires accurate contact and property information. Keep your password secure and enable any available account protections."
+    },
+    "postingListings": {
+      "title": "2. Posting listings",
+      "text": "When posting a listing, provide truthful descriptions, correct pricing, and clear photos. Listings with misleading or fraudulent information may be removed. Add contact details and availability to help buyers reach you faster."
+    },
+    "safetyTips": {
+      "title": "3. Safety tips",
+      "card1Title": "Meet safely",
+      "card1Desc": "Meet in public places and bring someone with you for viewings.",
+      "card2Title": "Secure payments",
+      "card2Desc": "Use verified payment methods and get written receipts.",
+      "card3Title": "Verify identity",
+      "card3Desc": "Verify the identity of people you transact with before sharing personal information.",
+      "card4Title": "Report issues",
+      "card4Desc": "Report suspicious listings or users so we can take action quickly."
+    },
+    "liability": {
+      "title": "4. Limitation of liability",
+      "text": "The platform is a listing service and provided \"as is.\" We do not guarantee the accuracy of user-submitted content and are not responsible for disputes or losses arising from interactions between users."
+    },
+    "disputes": {
+      "title": "5. Disputes and termination",
+      "text": "We reserve the right to suspend or remove accounts or listings that violate these terms. For disputes between users, please seek direct resolution or legal advice where necessary."
+    },
+    "contact": {
+      "title": "6. Contact",
+      "text": "For questions about these terms, reach out to our support team. Include relevant listing IDs or account details to help us respond quickly.",
+      "cta": "Contact Support",
+      "download": "Download PDF"
+    }
+  },
+
+  "links": {
+    "summary": "Summary",
+    "postingListings": "Posting listings",
+    "safetyTips": "Safety tips",
+    "liability": "Limitation of liability",
+    "contact": "Contact"
+  }
+}
