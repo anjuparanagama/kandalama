@@ -5,10 +5,11 @@ import en from "../locales/en/common.json";
 import si from "../locales/si/common.json";
 import ta from "../locales/ta/common.json";
 import aboutUsEn from "../locales/en/aboutUs.json";
+import aboutUsSi from "../locales/si/aboutUs.json";
 
 const resources = {
   en: { translation: en, aboutUs: aboutUsEn },
-  si: { translation: si, aboutUs: {} },
+  si: { translation: si, aboutUs: aboutUsSi },
   ta: { translation: ta, aboutUs: {} },
 };
 
