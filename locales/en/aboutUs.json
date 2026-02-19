@@ -1,0 +1,43 @@
+{
+  "title": "About Kandalama Lk",
+  "heading": "About Kandalama",
+  "subHeadingSuffix": "Lk",
+  "intro": "කණ්ඩලම Lk is a people-first property marketplace for Sri Lanka — built to make listing, discovering and contacting sellers straight Forward and fast.",
+  "postYourProperty": "Post Your Property",
+  "browseListings": "Browse Listings",
+  "whatWeOfferTitle": "What we offer",
+  "offers": [
+    {
+      "emoji": "🏠",
+      "title": "Clear listings",
+      "desc": "Photos, price and location in every ad."
+    },
+    {
+      "emoji": "📍",
+      "title": "Local search",
+      "desc": "Filter by district, city or neighborhood."
+    },
+    {
+      "emoji": "🔒",
+      "title": "Safety tips",
+      "desc": "Guidance on secure contact and verification."
+    }
+  ],
+  "howItWorksTitle": "How it works",
+  "howItWorksSteps": [
+    "Create or sign in — or continue as a guest.",
+    "Post an ad with images and a map location.",
+    "Respond to inquiries directly via WhatsApp or phone."
+  ],
+  "commonQuestionsTitle": "Common questions",
+  "postingFreeQuestion": "Is posting free?",
+  "postingFreeAnswer": "Yes — basic listings are free. Featured promotions may be available.",
+  "reportProblemQuestion": "How do I report a problem?",
+  "reportProblemAnswer": "Use the contact Number or email kandalamalk@gmail.com.",
+  "quickActionsTitle": "Quick Actions",
+  "quickActions": ["Create a new ad", "Manage your ads", "Create an account"],
+  "needHelpTitle": "Need help?",
+  "needHelpDescription": "We're here to help — reach out and we'll respond quickly.",
+  "supportEmail": "Kandalamalk@gmail.com",
+  "supportWhatsApp": "WhatsApp: +94 75 90 66 754"
+}
