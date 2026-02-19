@@ -6,11 +6,13 @@ import si from "../locales/si/common.json";
 import ta from "../locales/ta/common.json";
 import aboutUsEn from "../locales/en/aboutUs.json";
 import aboutUsSi from "../locales/si/aboutUs.json";
+import termsEn from "../locales/en/terms.json";
+import termsSi from "../locales/si/terms.json";
 
 const resources = {
-  en: { translation: en, aboutUs: aboutUsEn },
-  si: { translation: si, aboutUs: aboutUsSi },
-  ta: { translation: ta, aboutUs: {} },
+  en: { translation: en, aboutUs: aboutUsEn, terms: termsEn },
+  si: { translation: si, aboutUs: aboutUsSi, terms: termsSi },
+  ta: { translation: ta, aboutUs: {}, terms: {} },
 };
 
 i18n.use(initReactI18next).init({
