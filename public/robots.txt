@@ -1,23 +1,9 @@
-# Kandalama.lk robots.txt
+# *
 User-agent: *
 Allow: /
-Disallow: /admin/
-Disallow: /api/
-Disallow: /auth/
-Disallow: /edit-ad/
-Disallow: /my-ads/
-Disallow: /forgot-password/
-Disallow: /reset-password/
-Allow: /login
-Allow: /register
 
-# Crawl delay for all bots
-Crawl-delay: 1
+# Host
+Host: https://kandalama.app
 
-# Google specific rules
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 0
-
-# Sitemap
+# Sitemaps
 Sitemap: https://kandalama.app/sitemap.xml
