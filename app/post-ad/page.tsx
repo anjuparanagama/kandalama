@@ -272,7 +272,7 @@ export default function PostAdPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="area_sqft">Area (sqft) *</Label>
+                        <Label htmlFor="area_sqft">Area (sqft)</Label>
                         <Input
                           id="area_sqft"
                           type="text"
