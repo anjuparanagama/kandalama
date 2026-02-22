@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import { toast } from 'sonner';
-import { useCloudinaryUpload } from '@/hooks/useCloudinaryUpload';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
+import { useCloudinaryUpload } from "@/hooks/useCloudinaryUpload";
 
 export interface IFormData {
   title: string;
@@ -43,24 +43,28 @@ interface UsePostAdReturn {
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   setImages: (images: File[] | ((prev: File[]) => File[])) => void;
   setPreviews: (previews: string[] | ((prev: string[]) => string[])) => void;
-  setErrors: (errors: Record<string, string> | ((prev: Record<string, string>) => Record<string, string>)) => void;
+  setErrors: (
+    errors:
+      | Record<string, string>
+      | ((prev: Record<string, string>) => Record<string, string>),
+  ) => void;
 }
 
 const initialFormData: IFormData = {
-  title: '',
-  description: '',
-  price: '',
-  category: '',
-  listing_type: '',
-  location: '',
-  city: '',
-  district: '',
-  bedrooms: '',
-  bathrooms: '',
-  area_sqft: '',
-  contact_number: '',
-  map_link: '',
-  whatsapp_number: '',
+  title: "",
+  description: "",
+  price: "",
+  category: "",
+  listing_type: "",
+  location: "",
+  city: "",
+  district: "",
+  bedrooms: "",
+  bathrooms: "",
+  area_sqft: "",
+  contact_number: "",
+  map_link: "",
+  whatsapp_number: "",
 };
 
 export const usePostAd = (): UsePostAdReturn => {
@@ -77,142 +81,185 @@ export const usePostAd = (): UsePostAdReturn => {
   const [authLoading, setAuthLoading] = useState(true);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const { uploadMultiple, uploading: uploadingToCloudinary } = useCloudinaryUpload({
-    onProgress: (current, total) => {
-      setUploadProgress(Math.round((current / total) * 100));
-    },
-  });
+  const { uploadMultiple, uploading: uploadingToCloudinary } =
+    useCloudinaryUpload({
+      onProgress: (current, total) => {
+        setUploadProgress(Math.round((current / total) * 100));
+      },
+    });
 
   // Check authentication on mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (!user) {
-          router.push('/login?redirect=/post-ad');
+          router.push("/login?redirect=/post-ad");
           return;
         }
         setAuthLoading(false);
       } catch (error) {
-        console.error('Auth check error:', error);
-        router.push('/login?redirect=/post-ad');
+        console.error("Auth check error:", error);
+        router.push("/login?redirect=/post-ad");
       }
     };
     checkAuth();
   }, [router]);
 
-  const updateFormData = useCallback((field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error for this field when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
-  }, [errors]);
+  const updateFormData = useCallback(
+    (field: string, value: string) => {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+      // Clear error for this field when user starts typing
+      if (errors[field]) {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
+      }
+    },
+    [errors],
+  );
 
-  const validateStep = useCallback((currentStep: number): boolean => {
-    const { title, category, listing_type, price, description, area_sqft, location, district, city } = formData;
-    const newErrors: Record<string, string> = {};
+  const validateStep = useCallback(
+    (currentStep: number): boolean => {
+      const {
+        title,
+        category,
+        listing_type,
+        price,
+        description,
+        area_sqft,
+        location,
+        district,
+        city,
+      } = formData;
+      const newErrors: Record<string, string> = {};
 
-    if (currentStep === 1) {
-      // Validate Step 1: Basic Information
-      if (!title.trim()) {
-        newErrors.title = 'Property title is required';
+      if (currentStep === 1) {
+        // Validate Step 1: Basic Information
+        if (!title.trim()) {
+          newErrors.title = "Property title is required";
+        }
+        if (!category) {
+          newErrors.category = "Property type is required";
+        }
+        if (!listing_type) {
+          newErrors.listing_type = "Listing type is required";
+        }
+        if (!price || parseFloat(price) <= 0) {
+          newErrors.price = "Valid price is required";
+        }
+      } else if (currentStep === 2) {
+        // Validate Step 2: Property Details
+        if (!description.trim()) {
+          newErrors.description = "Description is required";
+        }
+        if (!location.trim()) {
+          newErrors.location = "Location is required";
+        }
+        if (!district) {
+          newErrors.district = "District is required";
+        }
+        if (!city) {
+          newErrors.city = "City is required";
+        }
       }
-      if (!category) {
-        newErrors.category = 'Property type is required';
-      }
-      if (!listing_type) {
-        newErrors.listing_type = 'Listing type is required';
-      }
-      if (!price || parseFloat(price) <= 0) {
-        newErrors.price = 'Valid price is required';
-      }
-    } else if (currentStep === 2) {
-      // Validate Step 2: Property Details
-      if (!description.trim()) {
-        newErrors.description = 'Description is required';
-      }
-      if (!area_sqft || parseFloat(area_sqft) <= 0) {
-        newErrors.area_sqft = 'Valid area is required';
-      }
-      if (!location.trim()) {
-        newErrors.location = 'Location is required';
-      }
-      if (!district) {
-        newErrors.district = 'District is required';
-      }
-      if (!city) {
-        newErrors.city = 'City is required';
-      }
-    }
 
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) {
-      setShowAlert(true);
-      return false;
-    }
-    setShowAlert(false);
-    return true;
-  }, [formData]);
+      setErrors(newErrors);
+      if (Object.keys(newErrors).length > 0) {
+        setShowAlert(true);
+        return false;
+      }
+      setShowAlert(false);
+      return true;
+    },
+    [formData],
+  );
 
-  const isStepValid = useCallback((currentStep: number): boolean => {
-    const { title, category, listing_type, price, description, area_sqft, location, district, city } = formData;
+  const isStepValid = useCallback(
+    (currentStep: number): boolean => {
+      const {
+        title,
+        category,
+        listing_type,
+        price,
+        description,
+        area_sqft,
+        location,
+        district,
+        city,
+      } = formData;
 
-    if (currentStep === 1) {
-      return !!(title.trim() && category && listing_type && price && parseFloat(price) > 0);
-    } else if (currentStep === 2) {
-      return !!(description.trim() && area_sqft && parseFloat(area_sqft) > 0 && location.trim() && district && city);
-    }
+      if (currentStep === 1) {
+        return !!(
+          title.trim() &&
+          category &&
+          listing_type &&
+          price &&
+          parseFloat(price) > 0
+        );
+      } else if (currentStep === 2) {
+        return !!(description.trim() && location.trim() && district && city);
+      }
 
-    return true;
-  }, [formData]);
+      return true;
+    },
+    [formData],
+  );
 
   const validateAllSteps = useCallback((): boolean => {
-    const { title, category, listing_type, price, description, area_sqft, location, district, city, contact_number } = formData;
+    const {
+      title,
+      category,
+      listing_type,
+      price,
+      description,
+      area_sqft,
+      location,
+      district,
+      city,
+      contact_number,
+    } = formData;
     const newErrors: Record<string, string> = {};
 
     // Validate Step 1 fields
     if (!title.trim()) {
-      newErrors.title = 'Property title is required';
+      newErrors.title = "Property title is required";
     }
     if (!category) {
-      newErrors.category = 'Property type is required';
+      newErrors.category = "Property type is required";
     }
     if (!listing_type) {
-      newErrors.listing_type = 'Listing type is required';
+      newErrors.listing_type = "Listing type is required";
     }
     if (!price || parseFloat(price) <= 0) {
-      newErrors.price = 'Valid price is required';
+      newErrors.price = "Valid price is required";
     }
 
     // Validate Step 2 fields
     if (!description.trim()) {
-      newErrors.description = 'Description is required';
-    }
-    if (!area_sqft || parseFloat(area_sqft) <= 0) {
-      newErrors.area_sqft = 'Valid area is required';
+      newErrors.description = "Description is required";
     }
     if (!location.trim()) {
-      newErrors.location = 'Location is required';
+      newErrors.location = "Location is required";
     }
     if (!district) {
-      newErrors.district = 'District is required';
+      newErrors.district = "District is required";
     }
     if (!city) {
-      newErrors.city = 'City is required';
+      newErrors.city = "City is required";
     }
 
     // Validate Step 3 fields
     if (!contact_number.trim()) {
-      newErrors.contact_number = 'Contact number is required';
+      newErrors.contact_number = "Contact number is required";
     }
 
     if (images.length === 0) {
-      newErrors.images = 'At least one property image is required';
+      newErrors.images = "At least one property image is required";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -260,16 +307,18 @@ export const usePostAd = (): UsePostAdReturn => {
     setUploadProgress(0);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!user) {
-        router.push('/login?redirect=/post-ad');
+        router.push("/login?redirect=/post-ad");
         return;
       }
 
       // 1. Create property first
       const { data: property, error: propertyError } = await supabase
-        .from('properties')
+        .from("properties")
         .insert([
           {
             user_id: user.id,
@@ -308,25 +357,30 @@ export const usePostAd = (): UsePostAdReturn => {
           }));
 
           const { error: imagesError } = await supabase
-            .from('property_images')
+            .from("property_images")
             .insert(propertyImages);
 
           if (imagesError) {
-            console.error('Error saving image references:', imagesError);
+            console.error("Error saving image references:", imagesError);
             // Continue anyway - property was created
           }
         } catch (uploadError) {
-          console.error('Image upload failed:', uploadError);
+          console.error("Image upload failed:", uploadError);
           // Continue - property was created even if images failed
-          toast.warning('Property created successfully, but image upload failed. You can add images later by editing the property.', { duration: 5000 });
+          toast.warning(
+            "Property created successfully, but image upload failed. You can add images later by editing the property.",
+            { duration: 5000 },
+          );
         }
       }
 
-      toast.success('Property posted successfully!', { duration: 3000 });
+      toast.success("Property posted successfully!", { duration: 3000 });
       router.push(`/properties/${property.id}`);
     } catch (error) {
-      console.error('Error posting ad:', error);
-      toast.error('Failed to post advertisement. Please try again.', { duration: 5000 });
+      console.error("Error posting ad:", error);
+      toast.error("Failed to post advertisement. Please try again.", {
+        duration: 5000,
+      });
       isSubmittingRef.current = false;
       setLoading(false);
     }
