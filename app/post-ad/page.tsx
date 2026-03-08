@@ -242,7 +242,6 @@ export default function PostAdPage() {
                           </p>
                         )}
                       </div>
-
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="bedrooms">Bedrooms</Label>
@@ -270,7 +269,7 @@ export default function PostAdPage() {
                           />
                         </div>
                       </div>
-
+                      {/* //Area section */}
                       <div className="space-y-2">
                         <Label htmlFor="area_sqft">Area (sqft)</Label>
                         <Input
@@ -289,7 +288,6 @@ export default function PostAdPage() {
                           </p>
                         )}
                       </div>
-
                       <div className="space-y-2">
                         <Label htmlFor="location">Location *</Label>
                         <Input
@@ -308,7 +306,6 @@ export default function PostAdPage() {
                           </p>
                         )}
                       </div>
-
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="district">District *</Label>
