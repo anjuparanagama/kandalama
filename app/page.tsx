@@ -1,19 +1,27 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Building2, Maximize, Building, Home as HomeIcon, DoorOpen } from 'lucide-react';
-import CategoryCard from '@/components/CategoryCard';
-import PropertyCard from '@/components/PropertyCard';
-import FallingIcons from '@/components/FallingIcons';
-import { Button } from '@/components/ui/button';
-import { supabase, Property } from '@/lib/supabase';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  Building2,
+  Maximize,
+  Building,
+  Home as HomeIcon,
+  DoorOpen,
+} from "lucide-react";
+import CategoryCard from "@/components/CategoryCard";
+import PropertyCard from "@/components/PropertyCard";
+import FallingIcons from "@/components/FallingIcons";
+import { Button } from "@/components/ui/button";
+import { supabase, Property } from "@/lib/supabase";
 
 export default function Home() {
   const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
   const [latestProperties, setLatestProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>(
+    {},
+  );
 
   useEffect(() => {
     fetchProperties();
@@ -23,30 +31,34 @@ export default function Home() {
   async function fetchProperties() {
     try {
       const { data: featured } = await supabase
-        .from('properties')
-        .select(`
+        .from("properties")
+        .select(
+          `
           *,
           property_images(image_url, is_primary, display_order)
-        `)
-        .eq('is_featured', true)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
+        `,
+        )
+        .eq("is_featured", true)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
         .limit(3);
 
       const { data: latest } = await supabase
-        .from('properties')
-        .select(`
+        .from("properties")
+        .select(
+          `
           *,
           property_images(image_url, is_primary, display_order)
-        `)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
+        `,
+        )
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
         .limit(6);
 
       if (featured) setFeaturedProperties(featured as any);
       if (latest) setLatestProperties(latest as any);
     } catch (error) {
-      console.error('Error fetching properties:', error);
+      console.error("Error fetching properties:", error);
     } finally {
       setLoading(false);
     }
@@ -55,63 +67,63 @@ export default function Home() {
   async function fetchCategoryCounts() {
     try {
       const { data, error } = await supabase
-        .from('properties')
-        .select('category')
-        .eq('is_active', true);
+        .from("properties")
+        .select("category")
+        .eq("is_active", true);
 
       if (error) {
-        console.error('Error fetching category counts:', error);
+        console.error("Error fetching category counts:", error);
         return;
       }
 
       const counts: Record<string, number> = {};
       (data || []).forEach((row: any) => {
-        const cat = row.category || 'unknown';
+        const cat = row.category || "unknown";
         counts[cat] = (counts[cat] || 0) + 1;
       });
 
       setCategoryCounts(counts);
     } catch (err) {
-      console.error('Error fetching category counts:', err);
+      console.error("Error fetching category counts:", err);
     }
   }
 
   const categories = [
     {
-      key: 'house',
-      title: 'Houses',
+      key: "house",
+      title: "Houses",
       icon: HomeIcon,
-      href: '/properties?category=house',
+      href: "/properties?category=house",
     },
     {
-      key: 'land',
-      title: 'Land',
+      key: "land",
+      title: "Land",
       icon: Maximize,
-      href: '/properties?category=land',
+      href: "/properties?category=land",
     },
     {
-      key: 'commercial',
-      title: 'Commercial',
+      key: "commercial",
+      title: "Commercial",
       icon: Building,
-      href: '/properties?category=commercial',
+      href: "/properties?category=commercial",
     },
     {
-      key: 'room',
-      title: 'Rooms',
+      key: "room",
+      title: "Rooms",
       icon: DoorOpen,
-      href: '/properties?category=room',
+      href: "/properties?category=room",
     },
     {
-      key: 'annex',
-      title: 'Annex',
+      key: "annex",
+      title: "Annex",
       icon: Building2,
-      href: '/properties?category=annex',
+      href: "/properties?category=annex",
     },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <section className="relative bg-[#003566] text-white py-20 overflow-hidden">
+      <section className="relative bg-[#E91E63] text-white py-20 overflow-hidden">
         <FallingIcons />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
@@ -121,7 +133,10 @@ export default function Home() {
             Discover the best properties for sale and rent in Sri Lanka
           </p>
           <Link href="/properties">
-            <Button size="lg" className="bg-[#ffc300] text-black hover:bg-[#ffd60a] text-lg px-8 py-6">
+            <Button
+              size="lg"
+              className="bg-[#ffc300] text-black hover:bg-[#ffd60a] text-lg px-8 py-6"
+            >
               Browse Properties
             </Button>
           </Link>
@@ -129,7 +144,9 @@ export default function Home() {
       </section>
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-16">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-12">Browse by Category</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-12">
+          Browse by Category
+        </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {categories.map((category) => (
             <CategoryCard
@@ -181,7 +198,10 @@ export default function Home() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-80 bg-gray-200 animate-pulse rounded-lg"></div>
+              <div
+                key={i}
+                className="h-80 bg-gray-200 animate-pulse rounded-lg"
+              ></div>
             ))}
           </div>
         </section>
@@ -189,12 +209,17 @@ export default function Home() {
 
       <section className="bg-blue-600 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to List Your Property?</h2>
+          <h2 className="text-3xl font-bold mb-6">
+            Ready to List Your Property?
+          </h2>
           <p className="text-xl mb-8 text-blue-100">
             Reach thousands of potential buyers and renters
           </p>
           <Link href="/post-ad">
-            <Button size="lg" className="bg-[#ffb703] hover:bg-[#e6a103] text-black text-lg px-8 py-6">
+            <Button
+              size="lg"
+              className="bg-[#ffb703] hover:bg-[#e6a103] text-black text-lg px-8 py-6"
+            >
               Post Your Ad Now
             </Button>
           </Link>
