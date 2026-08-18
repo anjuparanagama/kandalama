@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/sonner";
 import I18nProvider from "@/components/I18nProvider";
 import { AuthStateHandler } from "@/components/AuthStateHandler";
-import { generateMetadata, createOrganizationSchema } from "@/lib/seo";
+import { generateMetadata, createOrganizationSchema, createWebSiteSchema } from "@/lib/seo";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,6 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const organizationSchema = createOrganizationSchema();
+  const websiteSchema = createWebSiteSchema();
 
   return (
     <html lang="en">
@@ -50,6 +51,13 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(organizationSchema),
+          }}
+        />
+        <Script
+          id="website-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(websiteSchema),
           }}
         />
 
