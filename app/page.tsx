@@ -123,7 +123,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <section className="relative bg-[#E91E63] text-white py-20 overflow-hidden">
+      <section className="relative bg-[#003566] text-white py-20 overflow-hidden">
         <FallingIcons />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
