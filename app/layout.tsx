@@ -33,6 +33,7 @@ export default function RootLayout({
           name="google-site-verification"
           content="YOUR_GOOGLE_VERIFICATION_CODE"
         />
+        <meta name="google-adsense-account" content="ca-pub-8602593942705279" />
 
         {/* Additional SEO Meta Tags */}
         <meta name="language" content="English" />
