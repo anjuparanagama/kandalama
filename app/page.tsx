@@ -207,6 +207,18 @@ export default function Home() {
         </section>
       )}
 
+      {/* Semantic SEO/GEO Section */}
+      <section className="bg-white py-12 md:py-16 border-t border-gray-100">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900">
+            About Kandalama.lk Real Estate Marketplace
+          </h2>
+          <p className="text-gray-600 leading-relaxed">
+            <strong>Kandalama.lk</strong> is Sri Lanka&apos;s premier property marketplace connecting buyers, sellers, and renters. Whether you are looking to buy a house, rent an apartment, purchase commercial land, or find a room/annex, our comprehensive platform offers the best real estate listings across Sri Lanka. We strive to provide accurate, up-to-date property information and a seamless browsing experience for all your real estate needs.
+          </p>
+        </div>
+      </section>
+
       <section className="bg-blue-600 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-6">

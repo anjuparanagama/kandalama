@@ -4,9 +4,9 @@ export const baseMetadata = {
   baseUrl: process.env.NEXT_PUBLIC_BASE_URL || "https://kandalama.app",
   siteName: "Kandalama.lk",
   siteDescription:
-    "Sri Lanka's trusted property marketplace for buying, selling, and renting houses, lands, commercial properties, and more.",
+    "Kandalama.lk is Sri Lanka's premier property and real estate marketplace. Buy, sell, or rent houses, lands, commercial properties, rooms, and annexes across Sri Lanka.",
   siteKeywords:
-    "property, rent, buy, sell, real estate Sri Lanka, houses, lands, commercial property, apartments",
+    "property, rent, buy, sell, real estate Sri Lanka, houses, lands, commercial property, apartments, real estate marketplace, Sri Lanka properties, buy land in Sri Lanka, rent house Colombo",
   twitterHandle: "@kandalamalk",
 };
 
@@ -162,3 +162,24 @@ export function createFAQSchema(
     })),
   };
 }
+
+export function createWebSiteSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: baseMetadata.siteName,
+    url: baseMetadata.baseUrl,
+    description: baseMetadata.siteDescription,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${baseMetadata.baseUrl}/properties?query={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+    about: {
+      "@type": "Thing",
+      name: "Sri Lanka Real Estate and Property Marketplace",
+      description: "An online platform connecting property buyers, sellers, and renters in Sri Lanka.",
+    },
+  };
+}
+
