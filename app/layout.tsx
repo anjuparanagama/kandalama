@@ -76,6 +76,13 @@ export default function RootLayout({
             });
           `}
         </Script>
+
+        {/* Adsterra Popunder */}
+        <Script
+          id="adsterra-script-2"
+          src="https://pl31065929.profitableratecpmnetwork.com/e3/7f/11/e37f114cb3d9eb343ae06ad429cd26d7.js"
+          strategy="afterInteractive"
+        />
       </head>
       <body className={inter.className}>
         <I18nProvider>
@@ -83,10 +90,41 @@ export default function RootLayout({
           <div className="flex flex-col min-h-screen">
             <Navbar />
             <main className="flex-1">{children}</main>
+
+            {/* Adsterra 728x90 Banner */}
+            <div className="flex justify-center w-full my-6 overflow-hidden min-h-[90px]">
+              <Script
+                id="adsterra-options"
+                strategy="afterInteractive"
+                dangerouslySetInnerHTML={{
+                  __html: `
+            atOptions = {
+              'key' : '27ca43d58cf4e4c5288278edd5dc55b7',
+              'format' : 'iframe',
+              'height' : 90,
+              'width' : 728,
+              'params' : {}
+            };
+          `,
+                }}
+              />
+              <Script
+                id="adsterra-invoke"
+                src="https://www.highrevenueformat.com/27ca43d58cf4e4c5288278edd5dc55b7/invoke.js"
+                strategy="afterInteractive"
+              />
+            </div>
+
             <Footer />
           </div>
           <Toaster position="top-center" richColors />
         </I18nProvider>
+        {/* Adsterra Social Bar */}
+        <Script
+          id="adsterra-social-bar"
+          src="https://pl31065932.profitableratecpmnetwork.com/d7/16/44/d716442e64dc7a1318d170a3fdf09d2f.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
