@@ -96,7 +96,7 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
 
             {/* Adsterra 728x90 Banner */}
-            <div className=" justify-center w-full my-6 overflow-hidden hidden md:flex min-h-[90px]">
+            {/*             <div className=" justify-center w-full my-6 overflow-hidden hidden md:flex min-h-[90px]">
               <Script
                 id="adsterra-options"
                 strategy="afterInteractive"
@@ -117,7 +117,7 @@ export default function RootLayout({
                 src="https://www.highrevenueformat.com/27ca43d58cf4e4c5288278edd5dc55b7/invoke.js"
                 strategy="afterInteractive"
               />
-            </div>
+            </div> */}
 
             <Footer />
           </div>
