@@ -94,31 +94,7 @@ export default function RootLayout({
           <div className="flex flex-col min-h-screen">
             <Navbar />
             <main className="flex-1">{children}</main>
-            <div className="my-6 hidden w-full justify-center overflow-hidden md:flex">
-              <div className="h-[90px] w-[728px] max-w-full">
-                <Script
-                  id="adsterra-options"
-                  strategy="afterInteractive"
-                  dangerouslySetInnerHTML={{
-                    __html: `
-          atOptions = {
-            'key': '27ca43d58cf4e4c5288278edd5dc55b7',
-            'format': 'iframe',
-            'height': 90,
-            'width': 728,
-            'params': {}
-          };
-        `,
-                  }}
-                />
 
-                <Script
-                  id="adsterra-invoke"
-                  strategy="afterInteractive"
-                  src="https://www.highrevenueformat.com/27ca43d58cf4e4c5288278edd5dc55b7/invoke.js"
-                />
-              </div>
-            </div>
             <Footer />
           </div>
           <Toaster position="top-center" richColors />

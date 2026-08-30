@@ -12,6 +12,7 @@ import {
 import CategoryCard from "@/components/CategoryCard";
 import PropertyCard from "@/components/PropertyCard";
 import FallingIcons from "@/components/FallingIcons";
+import Script from "next/script";
 import { Button } from "@/components/ui/button";
 import { supabase, Property } from "@/lib/supabase";
 
@@ -142,7 +143,31 @@ export default function Home() {
           </Link>
         </div>
       </section>
+      <div className="my-6 hidden w-full justify-center overflow-hidden md:flex">
+        <div className="h-[90px] w-[728px] max-w-full hidden md:block">
+          <Script
+            id="adsterra-options"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+          atOptions = {
+            'key': '27ca43d58cf4e4c5288278edd5dc55b7',
+            'format': 'iframe',
+            'height': 90,
+            'width': 728,
+            'params': {}
+          };
+        `,
+            }}
+          />
 
+          <Script
+            id="adsterra-invoke"
+            strategy="afterInteractive"
+            src="https://www.highrevenueformat.com/27ca43d58cf4e4c5288278edd5dc55b7/invoke.js"
+          />
+        </div>
+      </div>
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-16">
         <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-12">
           Browse by Category
@@ -214,7 +239,13 @@ export default function Home() {
             About Kandalama.lk Real Estate Marketplace
           </h2>
           <p className="text-gray-600 leading-relaxed">
-            <strong>Kandalama.lk</strong> is Sri Lanka&apos;s premier property marketplace connecting buyers, sellers, and renters. Whether you are looking to buy a house, rent an apartment, purchase commercial land, or find a room/annex, our comprehensive platform offers the best real estate listings across Sri Lanka. We strive to provide accurate, up-to-date property information and a seamless browsing experience for all your real estate needs.
+            <strong>Kandalama.lk</strong> is Sri Lanka&apos;s premier property
+            marketplace connecting buyers, sellers, and renters. Whether you are
+            looking to buy a house, rent an apartment, purchase commercial land,
+            or find a room/annex, our comprehensive platform offers the best
+            real estate listings across Sri Lanka. We strive to provide
+            accurate, up-to-date property information and a seamless browsing
+            experience for all your real estate needs.
           </p>
         </div>
       </section>
