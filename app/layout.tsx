@@ -96,7 +96,7 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
 
             {/* Adsterra 728x90 Banner */}
-            <div className="flex justify-center w-full my-6 overflow-hidden min-h-[90px]">
+            <div className=" justify-center w-full my-6 overflow-hidden hidden md:flex min-h-[90px]">
               <Script
                 id="adsterra-options"
                 strategy="afterInteractive"
