@@ -7,7 +7,11 @@ import Footer from "@/components/Footer";
 import { Toaster } from "@/components/ui/sonner";
 import I18nProvider from "@/components/I18nProvider";
 import { AuthStateHandler } from "@/components/AuthStateHandler";
-import { generateMetadata, createOrganizationSchema, createWebSiteSchema } from "@/lib/seo";
+import {
+  generateMetadata,
+  createOrganizationSchema,
+  createWebSiteSchema,
+} from "@/lib/seo";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -120,11 +124,13 @@ export default function RootLayout({
           <Toaster position="top-center" richColors />
         </I18nProvider>
         {/* Adsterra Social Bar */}
-        <Script
-          id="adsterra-social-bar"
-          src="https://pl31065932.profitableratecpmnetwork.com/d7/16/44/d716442e64dc7a1318d170a3fdf09d2f.js"
-          strategy="afterInteractive"
-        />
+        <div className="hidden md:block">
+          <Script
+            id="adsterra-social-bar"
+            src="https://pl31065932.profitableratecpmnetwork.com/d7/16/44/d716442e64dc7a1318d170a3fdf09d2f.js"
+            strategy="afterInteractive"
+          />
+        </div>
       </body>
     </html>
   );
