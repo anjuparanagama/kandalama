@@ -1,6 +1,12 @@
-# *
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /my-ads
+Disallow: /edit-ad/
+Disallow: /forgot-password
+Disallow: /reset-password
 
 # Host
 Host: https://kandalama.app

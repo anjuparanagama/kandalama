@@ -34,10 +34,12 @@ export default function RootLayout({
         <meta httpEquiv="x-ua-compatible" content="ie=edge" />
 
         {/* Verification Tags */}
-        <meta
-          name="google-site-verification"
-          content="YOUR_GOOGLE_VERIFICATION_CODE"
-        />
+        {process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION_ID && (
+          <meta
+            name="google-site-verification"
+            content={process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION_ID}
+          />
+        )}
         <meta name="google-adsense-account" content="ca-pub-8602593942705279" />
 
         {/* Additional SEO Meta Tags */}

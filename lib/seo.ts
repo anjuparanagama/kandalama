@@ -6,7 +6,7 @@ export const baseMetadata = {
   siteDescription:
     "Kandalama.lk is Sri Lanka's premier property and real estate marketplace. Buy, sell, or rent houses, lands, commercial properties, rooms, and annexes across Sri Lanka.",
   siteKeywords:
-    "property, rent, buy, sell, real estate Sri Lanka, houses, lands, commercial property, apartments, real estate marketplace, Sri Lanka properties, buy land in Sri Lanka, rent house Colombo",
+    "property Sri Lanka, houses for sale Sri Lanka, houses for rent Colombo, annex for rent Sri Lanka, rooms for rent Colombo, boarding rooms Sri Lanka, land for sale Sri Lanka, commercial property, real estate Sri Lanka, Kandalama.lk",
   twitterHandle: "@kandalamalk",
 };
 
@@ -35,16 +35,16 @@ export function generateMetadata(override: Partial<Metadata> = {}): Metadata {
     },
     openGraph: {
       type: "website",
-      locale: "en_US",
+      locale: "en_LK",
       url: baseMetadata.baseUrl,
       siteName: baseMetadata.siteName,
       title: "Kandalama.lk - Buy, Sell, and Rent Properties in Sri Lanka",
       description: baseMetadata.siteDescription,
       images: [
         {
-          url: "/og-image.png",
-          width: 1200,
-          height: 630,
+          url: "/icon.png",
+          width: 512,
+          height: 512,
           alt: "Kandalama.lk - Property Marketplace Sri Lanka",
           type: "image/png",
         },
@@ -52,17 +52,12 @@ export function generateMetadata(override: Partial<Metadata> = {}): Metadata {
     },
     twitter: {
       card: "summary_large_image",
-      title: "Kandalama.lk - Buy, Sell, and Rent Properties",
+      title: "Kandalama.lk - Buy, Sell, and Rent Properties in Sri Lanka",
       description: baseMetadata.siteDescription,
-      images: ["/og-image.png"],
+      images: ["/icon.png"],
     },
     alternates: {
       canonical: baseMetadata.baseUrl,
-      languages: {
-        "en-US": `${baseMetadata.baseUrl}/en`,
-        si: `${baseMetadata.baseUrl}/si`,
-        ta: `${baseMetadata.baseUrl}/ta`,
-      },
     },
     ...override,
   };
@@ -71,11 +66,16 @@ export function generateMetadata(override: Partial<Metadata> = {}): Metadata {
 export function createOrganizationSchema() {
   return {
     "@context": "https://schema.org",
-    "@type": "Organization",
+    "@type": ["Organization", "RealEstateAgent"],
     name: "Kandalama.lk",
     url: baseMetadata.baseUrl,
-    logo: `${baseMetadata.baseUrl}/logo.png`,
+    logo: `${baseMetadata.baseUrl}/icon.png`,
+    image: `${baseMetadata.baseUrl}/icon.png`,
     description: baseMetadata.siteDescription,
+    areaServed: {
+      "@type": "Country",
+      name: "Sri Lanka",
+    },
     sameAs: [
       "https://www.facebook.com/kandalama.lk",
       "https://www.instagram.com/kandalama.lk",
@@ -85,6 +85,8 @@ export function createOrganizationSchema() {
       "@type": "ContactPoint",
       contactType: "Customer Service",
       email: "support@kandalama.app",
+      areaServed: "LK",
+      availableLanguage: ["English", "Sinhala", "Tamil"],
     },
     address: {
       "@type": "PostalAddress",
@@ -99,35 +101,66 @@ export function createPropertySchema(property: {
   title: string;
   description: string;
   price: number;
-  listing_type: "rent" | "sell";
+  listing_type: "rent" | "sale" | "sell";
   category: string;
   image_url?: string;
   created_at?: string;
+  updated_at?: string;
   location?: string;
+  city?: string;
+  district?: string;
   bedrooms?: number;
   bathrooms?: number;
+  area_sqft?: number;
 }) {
+  const propertyUrl = `${baseMetadata.baseUrl}/properties/${property.id}`;
+  const isRent = property.listing_type === "rent";
+
   return {
     "@context": "https://schema.org",
-    "@type": "RealEstateProperty",
+    "@type": "RealEstateListing",
     name: property.title,
     description: property.description,
-    url: `${baseMetadata.baseUrl}/properties/${property.id}`,
-    image: property.image_url || `${baseMetadata.baseUrl}/placeholder.png`,
-    datePublished: property.created_at,
-    priceCurrency: "LKR",
-    price: property.price.toString(),
-    priceValidUntil: new Date(
-      Date.now() + 90 * 24 * 60 * 60 * 1000,
-    ).toISOString(),
-    availability: "https://schema.org/InStock",
-    offerType: property.listing_type === "rent" ? "Lease" : "Sale",
-    location: {
-      "@type": "Place",
-      name: property.location || "Sri Lanka",
+    url: propertyUrl,
+    image: property.image_url || `${baseMetadata.baseUrl}/icon.png`,
+    datePosted: property.created_at,
+    dateModified: property.updated_at || property.created_at,
+    offers: {
+      "@type": "Offer",
+      url: propertyUrl,
+      priceCurrency: "LKR",
+      price: property.price,
+      priceValidUntil: new Date(
+        Date.now() + 90 * 24 * 60 * 60 * 1000,
+      )
+        .toISOString()
+        .split("T")[0],
+      availability: "https://schema.org/InStock",
+      businessFunction: isRent
+        ? "http://purl.org/goodrelations/v1#LeaseOut"
+        : "http://purl.org/goodrelations/v1#Sell",
     },
-    numberOfRooms: property.bedrooms,
-    numberOfBathroomsUnitConfiguration: property.bathrooms,
+    about: {
+      "@type": "Accommodation",
+      name: property.title,
+      description: property.description,
+      numberOfRooms: property.bedrooms || undefined,
+      numberOfBathroomsTotal: property.bathrooms || undefined,
+      floorSize: property.area_sqft
+        ? {
+            "@type": "QuantitativeValue",
+            value: property.area_sqft,
+            unitCode: "FTK",
+          }
+        : undefined,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: property.location || undefined,
+        addressLocality: property.city || property.location || "Sri Lanka",
+        addressRegion: property.district || undefined,
+        addressCountry: "LK",
+      },
+    },
   };
 }
 
@@ -172,7 +205,7 @@ export function createWebSiteSchema() {
     description: baseMetadata.siteDescription,
     potentialAction: {
       "@type": "SearchAction",
-      target: `${baseMetadata.baseUrl}/properties?query={search_term_string}`,
+      target: `${baseMetadata.baseUrl}/properties?search={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
     about: {
